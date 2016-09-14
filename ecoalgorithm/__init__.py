@@ -1,3 +1,3 @@
-from . import _helpers
+from ._config import config
 
 __author__ = 'glenn'
