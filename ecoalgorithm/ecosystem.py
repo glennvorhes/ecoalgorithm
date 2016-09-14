@@ -8,12 +8,12 @@ from numpy.random import choice
 from .species import Individual
 from . import _helpers
 from . import models
-from . import _db_connect
+from . import db_connect
 import sqlalchemy
 
 __author__ = 'glenn'
 
-db_conn = _db_connect.db
+db_conn = db_connect.db
 
 
 def _dummy_picker():

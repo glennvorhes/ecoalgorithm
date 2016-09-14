@@ -2,10 +2,10 @@ from unittest import TestCase
 from test.example_species import Bird, Cat, Fish
 from ecoalgorithm.models import DbGeneration
 from ecoalgorithm.ecosystem import OneGeneration
-from ecoalgorithm import _db_connect
+from ecoalgorithm import db_connect
 from ecoalgorithm import models
 
-db_conn = _db_connect.db
+db_conn = db_connect.db
 
 
 class TestOneGeneration(TestCase):
@@ -57,7 +57,7 @@ class TestOneGeneration(TestCase):
         self.assertEqual(len(gen.next_gen_individuals), max_pop)
 
         db_conn.sess.query(models.DbGeneration).delete()
-        db_conn.sess.query(models._DbIndividual).delete()
+        db_conn.sess.query(models.DbIndividual).delete()
         db_conn.sess.commit()
 
         gen.write_to_db()
