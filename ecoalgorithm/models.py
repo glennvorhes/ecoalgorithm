@@ -3,16 +3,15 @@ from datetime import datetime
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from ecoalgorithm._config import db_path
 from ecoalgorithm import _helpers
-from ecoalgorithm._db_connect import db
+from ecoalgorithm.db_connect import db
 from ecoalgorithm.species import Individual
 import json
 
 
-__all__ = ['create_db']
+__all__ = ['create_db', 'DbGeneration', 'DbIndividual']
 
-Base = declarative_base(bind=db.engine)
+Base = declarative_base()
 
 
 class DbGeneration(Base):
@@ -20,18 +19,19 @@ class DbGeneration(Base):
     uid = sqlalchemy.Column(sqlalchemy.INTEGER, primary_key=True, index=True)
     gen_num = sqlalchemy.Column(sqlalchemy.INTEGER, index=True, unique=True, nullable=False)
     gen_time = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.now())
-    individuals = relationship('_DbIndividual', backref='generation')
+    individuals = relationship('DbIndividual', backref='generation')
     """
-    :type: list[_DbIndividual]
+    :type: list[DbIndividual]
     """
 
-    def __init__(self, individual_list=None):
+    def __init__(self, individual_list):
         """
 
         :param individual_list:
         :type individual_list: list[Individual]
         :return:
         """
+
         last_gen = db.sess.query(DbGeneration.gen_num).order_by(sqlalchemy.desc(DbGeneration.gen_num)).first()
 
         if last_gen is None or last_gen[0] is None:
@@ -42,14 +42,14 @@ class DbGeneration(Base):
         db.sess.commit()
 
         for ind in individual_list:
-            db.sess.add(_DbIndividual(self.gen_num, ind))
+            db.sess.add(DbIndividual(self.gen_num, ind))
 
         db.sess.commit()
 
     __table_args__ = {'sqlite_autoincrement': True}
 
 
-class _DbIndividual(Base):
+class DbIndividual(Base):
     __tablename__ = 'individual'
     uid = sqlalchemy.Column(sqlalchemy.INTEGER, primary_key=True)
     gen_num = sqlalchemy.Column(sqlalchemy.INTEGER, sqlalchemy.ForeignKey(DbGeneration.gen_num))
@@ -78,10 +78,8 @@ class _DbIndividual(Base):
 
 
 def create_db():
-
-    Base.metadata.drop_all()
-    Base.metadata.create_all()
-    print('models created')
+    Base.metadata.drop_all(bind=db.engine)
+    Base.metadata.create_all(bind=db.engine)
 
 if __name__ == '__main__':
     create_db()
