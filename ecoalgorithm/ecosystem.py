@@ -3,40 +3,17 @@ from collections import defaultdict
 import os
 import json
 import numpy as np
-from numpy.random import choice
 from datetime import datetime
+from numpy.random import choice
+from .species import Individual
+from . import _helpers
+from . import models
+from . import _db_connect
+import sqlalchemy
 
 __author__ = 'glenn'
 
-
-def _individual_picker(ind_list, power=2):
-    """
-    Make a chooser function in a closure
-
-    :param ind_list: the items to be potentially picked
-    :type ind_list: list
-    :param power: the power to which the picker decay function should be, use exp if not provided
-    :type power: float|None
-    :return: a chooser function
-    :rtype: function
-    """
-    wgt = np.linspace(-1, 0, len(ind_list) + 1)
-    wgt *= -1
-
-    wgt **= power
-    wgt = wgt[:-1]
-    wgt /= np.sum(wgt)
-
-    def pick():
-        """
-        Make weighted selection
-
-        :return: the selection
-        :rtype: Individual
-        """
-        return choice(ind_list, p=wgt)
-
-    return pick
+db_conn = _db_connect.db
 
 
 def _dummy_picker():
@@ -93,6 +70,269 @@ def _breed_pair(the_female, the_male):
     return out_list
 
 
+def _load_from_db():
+    pass
+
+
+def _clear_db():
+    pass
+
+
+def parse_generation(class_list):
+    """
+
+    :param class_list:
+    :type: list[type]
+    """
+    class_dict = dict()
+    """
+    :type: dict[str, type]
+    """
+
+    db_inds = []
+
+    for c in class_list:
+        class_dict[c.__name__] = c
+
+    lst_gen = db_conn.sess.query(models.DbGeneration).order_by(sqlalchemy.desc(
+        models.DbGeneration.gen_num
+    )).first()
+    """
+    :type: models.DbGeneration|None
+    """
+
+    if lst_gen:
+        for individual in lst_gen.individuals:
+            kw = json.loads(individual.kwargs)
+
+            if individual.class_name not in class_dict:
+                raise KeyError("Class name '{0}' not found in class list".format(
+                    individual.class_name
+                ))
+
+            # TODO add check for required kwargs
+
+            db_inds.append(
+                class_dict[individual.class_name](
+                    individual.success, **kw
+                )
+            )
+
+    return db_inds
+
+
+class OneGeneration(object):
+    def __init__(self, this_generation=None, max_population=50, picker_power=2.0):
+        """
+
+        :param this_generation: immature individuals
+        :param max_population: maximum population, stop breed operation when it has been reached
+        :param picker_power: exponent for the decay of picker weighting TODO think about replacing with e derived weight
+        :type this_generation: list[Individual]
+        :type max_population: int
+        :type picker_power: float
+        :return:
+        """
+
+        self._this_generation = []
+
+        if type(this_generation) is list:
+            self._this_generation.extend(this_generation)
+
+        self._dict_cls_name_species_list = defaultdict(list)
+        """
+        lookup list of individuals by class name
+        :type: dict[str, list[Individual]]
+        """
+
+        self._species_set = set()
+        """
+        unique set of class names
+        :type: set[str]
+        """
+
+        self._picker_power = picker_power
+        """
+        power to be used for the picker function
+        :type: float
+        """
+
+        self._all_picker = _dummy_picker
+        """
+        dummy picker created before the real one is implemented
+        :type: function
+        """
+
+        self._by_species_picker = {}
+        """
+        pickers but referenced by the individual species class names
+        :type: dict[str, function]
+        """
+
+        self._max_population = max_population
+        """
+        maximum population, keep creating new individuals until the maximum population is reached
+        :type: int
+        """
+
+        self._next_generation = []
+        """
+        list of individuals that will go on to the next generation
+        :type: list[Individual]
+        """
+
+    def mature(self):
+        """
+        mature all the individuals and add to the species_dict lookup
+        sort by all individuals
+        set up the _population species pickers
+        """
+
+        # loop over all individuals
+        for ind in self._this_generation:
+            assert isinstance(ind, Individual)
+
+            # only mature if not already, success is None when not mature
+            if ind.success is None:
+                ind.mature()
+
+            # add individual to species list dict
+            self._dict_cls_name_species_list[ind.__class__.__name__].append(ind)
+            self._species_set.add(ind.__class__.__name__)
+
+        # sort the individuals by success, highest first, set up the picker
+        self._this_generation.sort(key=lambda x: x.success, reverse=True)
+        self._all_picker = _helpers.individual_picker(self._this_generation, self._picker_power)
+
+        # loop over the species
+        for k, v in self._dict_cls_name_species_list.items():
+            # sort the individuals in the by species list by success with highest first
+            v.sort(key=lambda x: x.success, reverse=True)
+
+            # create the weighted picker functions
+            self._by_species_picker[k] = \
+                _helpers.individual_picker(v, self._picker_power)
+
+    def breed(self):
+        """
+        select the individuals to breed and reproduce
+        """
+
+        # start by breeding one pair from each species
+        for picker in self._by_species_picker.values():
+            female = picker()
+
+            male = None
+
+            while male is None or female == male:
+                # pick from same species as female
+                male = picker()
+                """:type: Individual"""
+
+            self._next_generation.extend(_breed_pair(female, male))
+
+        while len(self._next_generation) < self._max_population:
+            # pick first of pair from whole _population
+            female = self._all_picker()
+            """:type: Individual"""
+
+            # initialize the male to None
+            male = None
+
+            # keep looping while the male is None or the male and female selection refer to the same
+            while male is None or female == male:
+                # pick from same species as female
+                male = self._by_species_picker[female.__class__.__name__]()
+                """:type: Individual"""
+
+            # breed the two and append to the next generation
+            self._next_generation.extend(_breed_pair(female, male))
+
+            if len(self._next_generation) > self._max_population:
+                self._next_generation = self._next_generation[:self._max_population]
+
+    def write_to_db(self):
+        models.DbGeneration(self.this_gen_individuals)
+
+    def print_stats(self):
+        """
+        print out the population statistics
+        """
+
+        out_string = '## population statistics ##\n'
+        out_string += self._print_population_stats_helper('all')
+        out_string += self._print_population_stats_helper('next_gen_individuals')
+        out_string += '## end stats ##'
+        print(out_string)
+
+    def _print_population_stats_helper(self, selected_population):
+        """
+        helper to create the _population statistics output
+        :param selected_population: one of following: 'all', 'breeding', 'next_gen_individuals'
+        :type selected_population: string
+        :return: stats specific to this _population
+        :rtype: string
+        """
+
+        assert selected_population in ['all', 'breeding', 'next_gen_individuals']
+
+        if selected_population == 'all':
+            population_label = 'Population'
+            full_list = self._this_generation
+            species_list_dict = self._dict_cls_name_species_list
+        elif selected_population == 'next_gen_individuals':
+            population_label = 'Next DbGeneration'
+            full_list = self._next_generation
+            species_list_dict = defaultdict(list)
+            for ind in self._next_generation:
+                species_list_dict[ind.__class__.__name__].append(ind)
+        else:
+            raise Exception('_population identifier invalid')
+
+        all_template = '\t\tcount: {0}, mature: {1}, immature: {2}\n'
+        species_template = '\t\t{0}, count: {1}, mature: {2}, immature: {3}\n'
+
+        if len(full_list) == 0:
+            out_string = '\t{0} is empty\n'.format(population_label)
+        else:
+            out_string = '\t{0}\n'.format(population_label)
+            if selected_population == 'breeding' and full_list[0].success is not None:
+                out_string += '\t\tBest: {0}\n'.format(repr(full_list[0]))
+            pop_stats = _calc_population_stats(full_list)
+            out_string += all_template.format(*pop_stats)
+
+            if len(species_list_dict) == 0:
+                out_string += '{0} species list dict not set up'.format(population_label)
+            else:
+                unique_species = [k for k in self._dict_cls_name_species_list.keys()]
+                unique_species.sort()
+                for k in unique_species:
+                    species_stats = _calc_population_stats(species_list_dict[k])
+                    out_string += species_template.format(k, *species_stats)
+
+        return out_string
+
+    @property
+    def next_gen_individuals(self):
+        """
+        individuals in next generation
+
+        :return: list of individuals
+        :rtype: list[Individual]
+        """
+        return self._next_generation
+
+    @property
+    def this_gen_individuals(self):
+        """
+        individuals in next generation
+
+        :return: list of individuals
+        :rtype: list[Individual]
+        """
+        return self._this_generation
+
+
 class Ecosystem(object):
     """
     Management of species, individuals, and competition
@@ -105,7 +345,8 @@ class Ecosystem(object):
                  use_existing_results=True,
                  max_population=100,
                  picker_power=2.0,
-                 offspring_count=None
+                 offspring_count=None,
+                 generation_limit=None
                  ):
         """
         initialize the population
@@ -118,17 +359,20 @@ class Ecosystem(object):
         :param max_population: the maximum population to create, can be overridden by sum (species * offspring)
         :param picker_power: decay power, higher values favor more successful individuals, default 2
         :param offspring_count: override the offspring count defined by the species classes
+        :param generation_limit: limit on the number of generations run before exiting
         :type new_individuals: list|None
         :type results_directory: str|None
         :type use_existing_results: bool
         :type max_population: int
         :type picker_power: float
         :type offspring_count: int|None
+        :type generation_limit: int|None
         """
 
         self._max_population = max_population
         self._picker_power = picker_power
         self._print_output = False
+        self._generation_limit = generation_limit
 
         self._species_name_class_lookup = {}
 
@@ -151,9 +395,6 @@ class Ecosystem(object):
         # a set of unique species types/classes in the population, used to keep species persistence
         self._population_species_set = set()
 
-        # individuals in the next generation
-        self._next_generation = []
-
         # generation initialized to 0, updated to last generation if loading existing results
         self._generation = 0
 
@@ -173,10 +414,6 @@ class Ecosystem(object):
             self._results_directory = results_directory
         else:
             self._results_directory = os.path.join(os.getcwd(), 'results')
-
-        self._results_file_all = os.path.join(self._results_directory, 'results_all.txt')
-        self._results_file_best_individuals = os.path.join(self._results_directory, 'best_individuals.txt')
-        self._results_file_latest_generation = os.path.join(self._results_directory, 'latest_generation.json')
 
         # directory checking to make sure the expected directory and files exist
         self._use_existing_results = use_existing_results
@@ -338,78 +575,10 @@ class Ecosystem(object):
             return None
 
     def _mature_generation(self):
-        """
-        mature all the individuals and add to the species_dict lookup
-        sort by all individuals
-        set up the _population species pickers
-        """
-
-        # loop over all individuals
-        for ind in self._population:
-            assert isinstance(ind, Individual)
-
-            # only mature if not already, success is None when not mature
-            if ind.success is None:
-                ind.mature()
-
-            # add individual to species list dict
-            self._population_species_list_dict[ind.__class__.__name__].append(ind)
-            self._population_species_set.add(ind.__class__.__name__)
-
-        # sort the individuals by success, highest first, set up the picker
-        self._population.sort(key=lambda x: x.success, reverse=True)
-        self._population_picker = _individual_picker(self._population, self._picker_power)
-
-        # loop over the species
-        for k in self._population_species_list_dict:
-            # sort the individuals in the by species list by success with highest first
-            self._population_species_list_dict[k].sort(key=lambda x: x.success, reverse=True)
-
-            # create the weighted picker functions
-            self._population_species_picker[k] = \
-                _individual_picker(self._population_species_list_dict[k], self._picker_power)
+        pass
 
     def _breed(self):
-        """
-        select the individuals to breed and reproduce
-        """
-
-        # start by breeding one pair from each species
-        for picker in self._population_species_picker.values():
-            female = picker()
-
-            male = None
-
-            while male is None or female == male:
-                # pick from same species as female
-                male = picker()
-                """:type: Individual"""
-
-            self._next_generation.extend(_breed_pair(female, male))
-
-        while len(self._next_generation) < self._max_population:
-            # pick first of pair from whole _population
-            female = self._population_picker()
-            """:type: Individual"""
-
-            # initialize the male to None
-            male = None
-
-            # keep looping while the male is None or the male and female selection refer to the same
-            while male is None or female == male:
-                # pick from same species as female
-                male = self._population_species_picker[female.__class__.__name__]()
-                """:type: Individual"""
-
-            # breed the two and append to the next generation
-            progeny_list = _breed_pair(female, male)
-
-            available_spots = self._max_population - len(self._next_generation)
-
-            if len(progeny_list) > available_spots:
-                self._next_generation.extend(progeny_list[:available_spots])
-            else:
-                self._next_generation.extend(progeny_list)
+        pass
 
     def _write_generation_to_file(self):
         """
@@ -429,63 +598,9 @@ class Ecosystem(object):
             json.dump({
                 'generation': self._generation,
                 'date': dte_string,
-                'individuals': [i.to_dict() for i in self._population]
+                'individuals': [i.params() for i in self._population]
             }, f, indent=4)
 
-    def show_population_stats(self):
-        """
-        print out the population statistics
-        """
+        print('here')
 
-        out_string = '## population statistics ##\n'
-        out_string += self._print_population_stats_helper('all')
-        out_string += self._print_population_stats_helper('next_gen')
-        out_string += '## end stats ##'
-        print(out_string)
-
-    def _print_population_stats_helper(self, selected_population):
-        """
-        helper to create the _population statistics output
-        :param selected_population: one of following: 'all', 'breeding', 'next_gen'
-        :type selected_population: string
-        :return: stats specific to this _population
-        :rtype: string
-        """
-
-        assert selected_population in ['all', 'breeding', 'next_gen']
-
-        if selected_population == 'all':
-            population_label = 'Population'
-            full_list = self._population
-            species_list_dict = self._population_species_list_dict
-        elif selected_population == 'next_gen':
-            population_label = 'Next Generation'
-            full_list = self._next_generation
-            species_list_dict = defaultdict(list)
-            for ind in self._next_generation:
-                species_list_dict[ind.__class__.__name__].append(ind)
-        else:
-            raise Exception('_population identifier invalid')
-
-        all_template = '\t\tcount: {0}, mature: {1}, immature: {2}\n'
-        species_template = '\t\t{0}, count: {1}, mature: {2}, immature: {3}\n'
-
-        if len(full_list) == 0:
-            out_string = '\t{0} is empty\n'.format(population_label)
-        else:
-            out_string = '\t{0}\n'.format(population_label)
-            if selected_population == 'breeding' and full_list[0].success is not None:
-                out_string += '\t\tBest: {0}\n'.format(repr(full_list[0]))
-            pop_stats = _calc_population_stats(full_list)
-            out_string += all_template.format(*pop_stats)
-
-            if len(species_list_dict) == 0:
-                out_string += '{0} species list dict not set up'.format(population_label)
-            else:
-                unique_species = [k for k in self._population_species_list_dict.keys()]
-                unique_species.sort()
-                for k in unique_species:
-                    species_stats = _calc_population_stats(species_list_dict[k])
-                    out_string += species_template.format(k, *species_stats)
-
-        return out_string
+        models.DbGeneration(self._population)

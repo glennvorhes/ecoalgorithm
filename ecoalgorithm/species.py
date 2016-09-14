@@ -30,20 +30,23 @@ class Individual(object):
             raise Exception('must produce 2 or more offspring')
         cls._offspring_count = new_count
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, success=None, **kwargs):
         """
         Constructor
 
-        :param args:
-        :type args: list|tuple
+        :param success:
+        :type success: float|None
         :param kwargs: kwargs
         :type kwargs: dict
         """
         self.success = None
         self.guid = str(uuid1())
 
+        if success is not None:
+            self.success = success
+
         if 'success' in kwargs:
-            self.success = kwargs['success']
+            del kwargs['success']
 
         for k, v in kwargs.items():
             if k in self.__dict__:
@@ -92,7 +95,7 @@ class Individual(object):
         ordered_keys = [k for k in self.__dict__.keys()]
         ordered_keys.sort()
 
-        k_v_list = []
+        k_v_list = list()
 
         k_v_list.append('success={0}'.format(self.success))
 
@@ -105,7 +108,7 @@ class Individual(object):
 
         return out_str
 
-    def to_dict(self):
+    def params(self):
 
         ordered_keys = [k for k in self.__dict__.keys()]
         ordered_keys.sort()
@@ -117,10 +120,15 @@ class Individual(object):
                 continue
             params[k] = self.__getattribute__(k)
 
-        params['success'] = self.success
+        return params
 
-        return {
-            'class_name': self.__class__.__name__,
-            'params': params
-        }
+    @property
+    def class_name(self):
+        """
+        Get the class name
+
+        :return: class name
+        :rtype: str
+        """
+        return self.__class__.__name__
 
