@@ -4,8 +4,10 @@ import os
 class EcoConfig:
 
     def __init__(self):
-        # self._db_path = os.path.join(os.getcwd(), 'results.db')
-        self._db_path = '/home/glenn/PycharmProjects/ecoalgorithm/ecoalgorithm/results2.db'
+        self._db_path = None
+        self._stop_threshold_percent = 1.0
+        self._stop_threshold_generations = 5
+        # self._db_path = '/home/glenn/PycharmProjects/ecoalgorithm/ecoalgorithm/results.db'
 
     @property
     def db_path(self):
@@ -14,6 +16,8 @@ class EcoConfig:
         :return: path to sqlite db
         :rtype: str
         """
+        if self._db_path is None:
+            raise Exception('db path not defined, set ecoalgorithm.config.db_path first')
         return self._db_path
 
     @db_path.setter
@@ -30,9 +34,27 @@ class EcoConfig:
         except AssertionError:
             raise AssertionError("The new db file has an invalid directory or does not end with .db")
 
-        if os.path.isfile(self._db_path):
+        if self._db_path is not None and os.path.isfile(self._db_path):
             os.remove(self.db_path)
 
         self._db_path = db
+
+    @property
+    def stop_threshold_percent(self):
+        """
+
+        :return: threshold change after which to stop
+        :rtype: float|None
+        """
+        return self._stop_threshold_percent
+
+    @property
+    def stop_threshold_generations(self):
+        """
+
+        :return: number of successive generations below threshold required to break
+        :rtype: int|None
+        """
+        return self._stop_threshold_generations
 
 config = EcoConfig()

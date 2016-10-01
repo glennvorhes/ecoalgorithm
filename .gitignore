@@ -1,2 +1,3 @@
 .idea/*
-*/results/*
+**/*.db
+node_modules

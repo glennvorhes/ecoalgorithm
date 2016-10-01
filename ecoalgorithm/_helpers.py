@@ -8,40 +8,99 @@ import sqlalchemy
 
 from sqlalchemy.orm import relationship, Session
 from sqlalchemy import func
-from ecoalgorithm.species import Individual
+from ecoalgorithm.species import SpeciesBase
 from sqlalchemy.orm import scoped_session, sessionmaker
 import atexit
 from ecoalgorithm import models
+#
+#
+# def individual_picker(ind_list, power=2):
+#     """
+#     Make a chooser function in a closure
+#
+#     :param ind_list: the items to be potentially picked
+#     :type ind_list: list[SpeciesBase]
+#     :param power: the power to which the picker decay function should be, use exp if not provided
+#     :type power: float|None
+#     :return: a chooser function
+#     :rtype: function
+#     """
+#
+#     ind_list = [i for i in ind_list if i.is_alive]
+#
+#     ind_list.sort(key=lambda x: x.success, reverse=True)
+#
+#     wgt = np.linspace(-1, 0, len(ind_list) + 1)
+#     wgt *= -1
+#
+#     wgt **= power
+#     wgt = wgt[:-1]
+#     wgt /= np.sum(wgt)
+#
+#     def pick_female():
+#         """
+#         Make weighted selection
+#
+#         :return: the selection
+#         :rtype: SpeciesBase
+#         """
+#         if len(ind_list) == 0:
+#             return None
+#         else:
+#             return choice(ind_list, p=wgt)
+#
+#     return pick_female
 
 
-def individual_picker(ind_list, power=2):
-    """
-    Make a chooser function in a closure
+class IndividualPicker:
 
-    :param ind_list: the items to be potentially picked
-    :type ind_list: list
-    :param power: the power to which the picker decay function should be, use exp if not provided
-    :type power: float|None
-    :return: a chooser function
-    :rtype: function
-    """
-    wgt = np.linspace(-1, 0, len(ind_list) + 1)
-    wgt *= -1
+    def __init__(self, ind_list, power=2):
+        """
+        Make a chooser function in a closure
 
-    wgt **= power
-    wgt = wgt[:-1]
-    wgt /= np.sum(wgt)
+        :param ind_list: the items to be potentially picked
+        :type ind_list: list[SpeciesBase]
+        :param power: the power to which the picker decay function should be, use exp if not provided
+        :type power: float|None
+        """
 
-    def pick():
+        self._ind_list = [i for i in ind_list if i.is_alive]
+
+        self._ind_list.sort(key=lambda x: x.success, reverse=True)
+        self._wgt = np.linspace(-1, 0, len(self._ind_list) + 1)
+
+        self._wgt *= -1
+
+        self._wgt **= power
+        self._wgt = self._wgt[:-1]
+        self._wgt /= np.sum(self._wgt)
+
+    def pick_female(self):
         """
         Make weighted selection
 
         :return: the selection
-        :rtype: Individual
+        :rtype: SpeciesBase
         """
-        return choice(ind_list, p=wgt)
 
-    return pick
+        if self.num_alive == 0:
+            return None
+        else:
+            return choice(self._ind_list, p=self._wgt)
+
+    def pick_male(self, female):
+
+        ix_female = self._ind_list.index(female)
+
+        no_female = [self._ind_list[i] for i in range(len(self._ind_list)) if i != ix_female]
+        no_female_weight = [self._wgt[i] for i in range(len(self._wgt)) if i != ix_female]
+        no_female_weight /= np.sum(no_female_weight)
+
+        return choice(no_female, p=no_female_weight)
+
+    @property
+    def num_alive(self):
+        return len(self._ind_list)
 
 
 def picker_power_iterations(power, itr):
@@ -52,10 +111,10 @@ def picker_power_iterations(power, itr):
         t.append(i)
         picker_count[str(i)] = 0
 
-    picker = individual_picker(t, power=power)
+    picker = IndividualPicker(t, power=power)
 
     for i in range(itr):
-        pick_val = picker()
+        pick_val = picker.pick_female()
         picker_count[str(pick_val)] += 1
 
     for k, v in picker_count.items():

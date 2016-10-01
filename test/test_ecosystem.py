@@ -1,4 +1,8 @@
+import ecoalgorithm
+ecoalgorithm.config.db_path = '/home/glenn/PycharmProjects/ecoalgorithm/results.db'
+
 from unittest import TestCase
+
 
 from ecoalgorithm.ecosystem import Ecosystem
 from test.example_species import Bird, Cat, Fish
@@ -7,12 +11,12 @@ from ecoalgorithm.db_connect import db
 
 from ecoalgorithm.models import DbGeneration
 
+
 max_population = 40
 offspring_count = 5
 
 
 class TestEcosystem(TestCase):
-
     def setUp(self):
         self.inds = []
 
@@ -28,18 +32,35 @@ class TestEcosystem(TestCase):
     def tearDown(self):
         pass
 
-    def _clear_db(self):
-        pass
-        #
-        # db.sess.query(models.DbIndividual).delete()
-        # db.sess.
-        # db.sess.query(models.DbGeneration).delete()
-        # models.
-
     def _delete_db(self):
         pass
 
-    def test_reinitialize_eco(self):
-        self.ecosystem = Ecosystem(self.inds, species_classes=[Bird, Cat], use_existing_results=True,
-                                   max_population=max_population, picker_power=2)
+    # def test_run(self):
+    #     db.clear_db()
+    #     ecosystem = Ecosystem(self.inds, species_classes=[Bird, Cat, Fish], use_existing_results=True,
+    #                           max_population=max_population, picker_power=2)
+    #
+    #     print(ecosystem.run(100))
 
+    def test_reinit(self):
+        db.clear_db()
+        ecosystem = Ecosystem(self.inds, species_classes=[Bird, Cat, Fish], use_existing_results=True,
+                              max_population=max_population, picker_power=2)
+
+        print(ecosystem.run(100, 'short'))
+
+        ecosystem = Ecosystem(species_classes=[Bird, Cat, Fish], use_existing_results=True,
+                              max_population=max_population, picker_power=2)
+
+        print(ecosystem.run(100, 'short'))
+
+
+        ecosystem = Ecosystem(species_classes=[Bird, Cat, Fish], use_existing_results=True,
+                              max_population=max_population, picker_power=2)
+
+        print(ecosystem.run(100, 'short'))
+        #
+        ecosystem = Ecosystem(species_classes=[Bird, Cat, Fish], use_existing_results=True,
+                              max_population=max_population, picker_power=2)
+
+        print(ecosystem.run(100, 'short'))
