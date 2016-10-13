@@ -1,7 +1,4 @@
-import ecoalgorithm
-ecoalgorithm.config.db_path = '/home/glenn/PycharmProjects/ecoalgorithm/results.db'
+import test
+from ecoalgorithm import start_web_server
 
-from ecoalgorithm.web import app
-
-
-app.run(port=5001, debug=True)
+start_web_server()

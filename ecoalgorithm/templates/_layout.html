@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% if title %}
+        <title>{{ title }}</title>
+    {% else %}
+        <title>Results</title>
+    {% endif %}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename="results.css") }}">
+    {% block head %}{% endblock head %}
+</head>
+<body>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+{% block body %}{% endblock body %}
+<script src="{{ url_for('static', filename="results.js") }}"></script>
+{% block after_script %}{% endblock after_script %}
+</body>
+</html>
+

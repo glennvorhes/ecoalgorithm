@@ -12,6 +12,7 @@ import sqlalchemy
 from .db_connect import db
 from ._config import config
 from ._helpers import IndividualPicker
+from enum import Enum
 
 __author__ = 'glenn'
 

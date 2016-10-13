@@ -7,6 +7,7 @@ from ecoalgorithm.ecosystem import Ecosystem
 import numpy as np
 from datetime import datetime
 
+
 class CommonProblem(SpeciesBase):
     def __init__(self, success=None, **kwargs):
         self.x = None

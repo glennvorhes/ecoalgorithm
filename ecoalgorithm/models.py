@@ -39,6 +39,7 @@ class DbGeneration(Base):
             self.gen_num = last_gen[0] + 1
         db.sess.add(self)
 
+
         for ind in individual_list:
             if ind.new_to_db:
                 db.sess.add(DbIndividual(self.gen_num, ind))

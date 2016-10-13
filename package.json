@@ -1,0 +1,35 @@
+{
+  "name": "ecoalgorithm",
+  "version": "0.0.0",
+  "description": "mimic natural selection among species",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "copy-c3": "cp node_modules/c3/c3.min.js ecoalgorithm/static/lib/c3.js & cp node_modules/c3/c3.min.css ecoalgorithm/static/lib/c3.css & cp node_modules/d3/d3.min.js ecoalgorithm/static/lib/d3.js",
+    "tsc": "tsc -w",
+    "webpack-d": "webpack -d -w",
+    "webpack-p": "webpack -p -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glennvorhes/ecoalgorithm.git"
+  },
+  "keywords": [
+    "genentic",
+    "machine",
+    "learning",
+    "optimization"
+  ],
+  "author": "Glenn Vorhes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/glennvorhes/ecoalgorithm/issues"
+  },
+  "devDependencies": {
+    "@types/c3": "0.0.35",
+    "c3": "^0.4.11"
+  }
+}

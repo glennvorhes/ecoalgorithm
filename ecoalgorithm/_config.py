@@ -7,7 +7,9 @@ class EcoConfig:
         self._db_path = None
         self._stop_threshold_percent = 1.0
         self._stop_threshold_generations = 5
-        # self._db_path = '/home/glenn/PycharmProjects/ecoalgorithm/ecoalgorithm/results.db'
+        self._web_port = 5001
+        self._web_debug = True
+        self._db_path = '/home/glenn/PycharmProjects/ecoalgorithm/results.db'
 
     @property
     def db_path(self):
@@ -56,5 +58,36 @@ class EcoConfig:
         :rtype: int|None
         """
         return self._stop_threshold_generations
+
+    @property
+    def web_port(self):
+        """
+
+        :return:
+        :rtype: int
+        """
+        return self._web_port
+
+    @web_port.setter
+    def web_port(self, port):
+        self._web_port = port
+
+    @property
+    def web_debug(self):
+        """
+
+        :return: web debug
+        :rtype: bool
+        """
+        return self._web_debug
+
+    @web_debug.setter
+    def web_debug(self, debug):
+        """
+
+        :param debug:
+        :type debug: bool
+        """
+        self._web_debug = debug
 
 config = EcoConfig()
