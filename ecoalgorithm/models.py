@@ -63,9 +63,21 @@ def _breed(individual_1, individual_2):
     """
     assert type(individual_1) is type(individual_2)
 
+    if not individual_1.is_mature:
+        raise AssertionError("individual 1 is not mature")
+
+    if not individual_2.is_mature:
+        raise AssertionError("individual 2 is not mature")
+
+    if not individual_1.is_alive:
+        raise AssertionError("individual 1 is not alive")
+
+    if not individual_2.is_alive:
+        raise AssertionError("individual 2 is not alive")
+
     out_list = []
     """
-    :type: list[self]
+    :type: list[SpeciesBase]
     """
     offspring_count = individual_1.get_offspring_count()
 
@@ -92,6 +104,7 @@ class SpeciesBase(Base):
     _parent1_id = sqlalchemy.Column(sqlalchemy.String(36))
     _parent2_id = sqlalchemy.Column(sqlalchemy.String(36))
     _kwargs = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    _alive = sqlalchemy.Column(sqlalchemy.String(1), nullable=False, default='T')
 
     _offspring_count = 5
 
@@ -121,6 +134,30 @@ class SpeciesBase(Base):
             raise Exception('must produce 2 or more offspring')
         cls._offspring_count = new_count
 
+    @classmethod
+    def validate_class(cls):
+        ind1 = cls()
+        ind2 = cls()
+
+        ind1.mature()
+        ind2.mature()
+
+        assert ind1._success_set
+        assert ind2._success_set
+
+        if not ind1.is_alive:
+            ind1.success = 10
+
+        if not ind2.is_alive:
+            ind2.success = 10
+
+        progeny = _breed(ind1, ind2)
+
+        assert len(progeny) == ind1.get_offspring_count()
+
+        print("class '{0}' successfully verified".format(ind1.class_name))
+        return True
+
     def __init__(self):
         if self._uid is None:
             self._guid = str(uuid4())
@@ -130,8 +167,13 @@ class SpeciesBase(Base):
             self._parent2_id = None
             self._kwargs = json.dumps(self.params)
             self._success = None
+            self._alive = 'T'
+
+            self._success_set = False
         else:
             self._set_attributes(**json.loads(self._kwargs))
+
+            self._success_set = True
 
     def update_params(self):
         self._kwargs = json.dumps(self.params)
@@ -178,7 +220,6 @@ class SpeciesBase(Base):
                 raise AssertionError('Attribute \'{0}\' not defined by constructor in class \'{1}\''.format(
                     k, self.class_name
                 ))
-
 
     @property
     def guid(self):
@@ -234,6 +275,24 @@ class SpeciesBase(Base):
         if self._gen_num is None:
             self._gen_num = gen
 
+    @property
+    def success(self):
+        return self._success
+
+    @success.setter
+    def success(self, success):
+        self._success_set = True
+        self._success = success
+        self._alive = 'T' if success is not None else 'F'
+
+    @property
+    def is_mature(self):
+        return self._success_set
+
+    @property
+    def is_alive(self):
+        return self._alive == 'T'
+
 
 
 
@@ -243,5 +302,3 @@ def create_db():
 
 if __name__ == '__main__':
     create_db()
-
-

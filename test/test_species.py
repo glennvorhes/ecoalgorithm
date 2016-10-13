@@ -4,20 +4,18 @@ from random import random
 from ecoalgorithm.db_connect import db
 from ecoalgorithm import models
 
-
 random_change = 2
 
 
 class ExampleSpecies(SpeciesBase):
-
     def __init__(self, x=None, y=None, blue=None):
         self.x = x if type(x) is float else (random() - 0.5) * 200
         self.y = y if type(y) is float else (random() - 0.5) * 200
-        self.blue = blue if type(blue) is bool else True if random() >0.5 else False
+        self.blue = blue if type(blue) is bool else True if random() > 0.5 else False
         super().__init__()
 
     def mature(self):
-        self._success = -1 * (self.x - 15) ** 2 + -1 * (self.y + 4) ** 2 + 25
+        self.success = -1 * (self.x - 15) ** 2 + -1 * (self.y + 4) ** 2 + 25
 
     def mutate(self):
         pass
@@ -36,7 +34,6 @@ class ExampleSpecies(SpeciesBase):
 
 
 class SpeciesTest(TestCase):
-
     # @staticmethod
     # def get_first():
     #     """
@@ -88,6 +85,7 @@ class SpeciesTest(TestCase):
         self.clear_inds()
 
         ind = ExampleSpecies()
+
         ind._gen_num = 10
         self.assertIsNone(ind._uid)
         db.sess.add(ind)
@@ -160,12 +158,25 @@ class SpeciesTest(TestCase):
 
         self.assertEqual(total, db.sess.query(models.SpeciesBase).count())
 
+    def test_breed_assertions(self):
+        self.clear_inds()
 
+        ind1 = self.add_one()
+        ind2 = self.add_one()
+        with self.assertRaises(AssertionError):
+            models._breed(ind1, ind2)
 
+        ind1.mature()
+        ind2.mature()
 
+        models._breed(ind1, ind2)
 
+        ind1.success = None
+        with self.assertRaises(AssertionError):
+            models._breed(ind1, ind2)
 
+        ind1.success = 10
+        models._breed(ind1, ind2)
 
-
-
-
+    def test_validate_class(self):
+        self.assertTrue(ExampleSpecies.validate_class())
