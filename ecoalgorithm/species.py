@@ -11,26 +11,7 @@ class SpeciesBase(object):
     """
     _offspring_count = 5
 
-    @classmethod
-    def get_offspring_count(cls):
-        """
-        get the number of offspring produced by this species
-        :return: the number of offspring returned by breed
-        :rtype: int
-        """
-        return cls._offspring_count
 
-    @classmethod
-    def set_offspring_count(cls, new_count):
-        """
-        Set the number of offspring produced by this species
-        :param new_count: new offspring count
-        :type new_count: int
-        :return:
-        """
-        if new_count < 2:
-            raise Exception('must produce 2 or more offspring')
-        cls._offspring_count = new_count
 
     @classmethod
     def validate_species(cls):
@@ -107,6 +88,8 @@ class SpeciesBase(object):
         self._parent2 = None
         self._is_alive = True
 
+
+
     @abstractmethod
     def mature(self):
         """
@@ -114,12 +97,12 @@ class SpeciesBase(object):
         """
         pass
 
+    @abstractmethod
     def mutate(self):
         """
         apply random mutation
         """
-        # dummy
-        assert self.class_name == self.__class__.__name__
+        pass
 
     @abstractmethod
     def mate(self, other_individual):
@@ -166,15 +149,7 @@ class SpeciesBase(object):
 
         return params
 
-    @property
-    def class_name(self):
-        """
-        Get the class name
 
-        :return: class name
-        :rtype: str
-        """
-        return self.__class__.__name__
 
     @property
     def success(self):
@@ -264,6 +239,5 @@ class SpeciesBase(object):
 
         :return:
         """
-
 
         return self._is_alive

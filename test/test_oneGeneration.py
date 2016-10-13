@@ -57,7 +57,7 @@ class TestOneGeneration(TestCase):
         self.assertEqual(len(gen.next_gen_individuals), max_pop)
 
         db_conn.sess.query(models.DbGeneration).delete()
-        db_conn.sess.query(models.DbIndividual).delete()
+        db_conn.sess.query(models.SpeciesBase).delete()
         db_conn.sess.commit()
 
         gen.write_to_db()

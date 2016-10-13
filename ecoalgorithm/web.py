@@ -32,16 +32,16 @@ def summary():
     #     out_str += 'Generation {0}<br>'.format(g.gen_num)
 
     gen_summary = db.sess.query(
-        models.DbIndividual.gen_num,
-        sqlalchemy.func.max(models.DbIndividual.success),
-        models.DbIndividual.class_name,
-        sqlalchemy.func.count(models.DbIndividual.class_name)
+        models.SpeciesBase.gen_num,
+        sqlalchemy.func.max(models.SpeciesBase.success),
+        models.SpeciesBase.class_name,
+        sqlalchemy.func.count(models.SpeciesBase.class_name)
     ).group_by(
-        models.DbIndividual.gen_num,
-        models.DbIndividual.class_name
+        models.SpeciesBase.gen_num,
+        models.SpeciesBase.class_name
     ).order_by(
-        sqlalchemy.desc(models.DbIndividual.gen_num),
-        sqlalchemy.asc(models.DbIndividual.class_name)
+        sqlalchemy.desc(models.SpeciesBase.gen_num),
+        sqlalchemy.asc(models.SpeciesBase.class_name)
     )
 
     return render_template('summary.html', generations=generations)

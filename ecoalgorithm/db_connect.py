@@ -74,7 +74,7 @@ class _DbConnect:
 
     def clear_db(self):
         from . import models
-        self.sess.query(models.DbIndividual).delete()
+        self.sess.query(models.SpeciesBase).delete()
         self.sess.commit()
         self.sess.query(models.DbGeneration).delete()
         self.sess.commit()
