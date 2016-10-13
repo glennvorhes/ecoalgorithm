@@ -3,8 +3,7 @@ from datetime import datetime
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from ecoalgorithm.db_connect import db
-# from ecoalgorithm.species import SpeciesBase
+from .db_connect import db
 import json
 from uuid import uuid4
 from collections import OrderedDict
@@ -15,7 +14,7 @@ __all__ = ['create_db', 'DbGeneration', 'SpeciesBase']
 Base = declarative_base()
 
 
-class DbGeneration(Base):
+class Generation(Base):
     __tablename__ = 'generation'
     uid = sqlalchemy.Column(sqlalchemy.INTEGER, primary_key=True, index=True)
     gen_num = sqlalchemy.Column(sqlalchemy.INTEGER, index=True, unique=True, nullable=False)
@@ -96,7 +95,7 @@ class SpeciesBase(Base):
     _guid = sqlalchemy.Column(sqlalchemy.String(36), index=True, nullable=False)
     _gen_num = sqlalchemy.Column(
         sqlalchemy.INTEGER,
-        sqlalchemy.ForeignKey(DbGeneration.gen_num),
+        sqlalchemy.ForeignKey(Generation.gen_num),
         nullable=False
     )
     _class_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
@@ -293,7 +292,44 @@ class SpeciesBase(Base):
     def is_alive(self):
         return self._alive == 'T'
 
+    @classmethod
+    def get_by_guid(cls, guid):
+        """
 
+        :param guid:
+        :type guid: str|None
+        :return:
+        :rtype: SpeciesBase
+        """
+        if guid is None:
+            return None
+
+        ind = db.sess.query(cls).filter(cls._guid == guid).first()
+
+        if not ind:
+            return None
+
+        ind.__class__ = cls
+        ind.__init__()
+        return ind
+
+    @property
+    def parent1(self):
+        """
+
+        :return:
+        :rtype: SpeciesBase
+        """
+        return self.get_by_guid(self._parent1_id)
+
+    @property
+    def parent2(self):
+        """
+
+        :return:
+        :rtype: SpeciesBase
+        """
+        return self.get_by_guid(self._parent2_id)
 
 
 def create_db():

@@ -180,3 +180,30 @@ class SpeciesTest(TestCase):
 
     def test_validate_class(self):
         self.assertTrue(ExampleSpecies.validate_class())
+
+    def test_get_parents(self):
+        self.clear_inds()
+
+        ind1 = self.add_one()
+        ind2 = self.add_one()
+
+        x = ind1.x
+        y = ind2.y
+
+        ind1.mature()
+        ind2.mature()
+
+        out_list = models._breed(ind1, ind2)
+
+        for o in out_list:
+            o._gen_num = 10
+
+        db.sess.add_all(out_list)
+        db.sess.commit()
+
+        self.assertEquals(x, out_list[0].parent1.x)
+        self.assertEquals(y, out_list[0].parent2.y)
+
+        out_list[0]._parent1_id = None
+
+        self.assertIsNone(out_list[0].parent1)

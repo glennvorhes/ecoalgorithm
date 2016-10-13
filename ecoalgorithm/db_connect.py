@@ -59,7 +59,7 @@ class _DbConnect:
         if not self._checked:
             from . import models
             try:
-                sess.query(models.DbGeneration).first()
+                sess.query(models.Generation).first()
             except exc.OperationalError:
                 models.create_db()
         self._checked = True
