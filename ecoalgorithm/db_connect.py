@@ -76,7 +76,7 @@ class _DbConnect:
         from . import models
         self.sess.query(models.SpeciesBase).delete()
         self.sess.commit()
-        self.sess.query(models.DbGeneration).delete()
+        self.sess.query(models.Generation).delete()
         self.sess.commit()
 
     def delete_db(self):
