@@ -13,6 +13,7 @@ from .db_connect import db
 from ._config import config
 from ._helpers import IndividualPicker
 from enum import Enum
+from typing import Dict, List, Set
 
 __author__ = 'glenn'
 
@@ -42,36 +43,6 @@ def _calc_population_stats(pop_list):
             mature_count += 1
 
     return count, mature_count, immature_count
-
-
-def _breed_pair(the_female, the_male):
-    """
-
-    :param the_female:
-    :param the_male:
-    :type the_female: SpeciesBase
-    :type the_male: SpeciesBase
-    :return:
-    """
-    male_class = the_male.__class__
-
-    assert the_female.__class__ == male_class
-
-    if the_female.success is None or the_male.success is None:
-        raise Exception('not mature')
-
-    if the_female == the_male:
-        raise Exception('no self breeding')
-
-    out_list = []
-
-    for i in range(male_class.get_offspring_count()):
-        child = the_female.mate(the_male)
-        child.parent1 = the_female.guid
-        child.parent2 = the_male.guid
-        out_list.append(child)
-
-    return out_list
 
 
 def _load_from_db():
@@ -399,23 +370,24 @@ class Ecosystem(object):
     """
 
     def __init__(self,
-                 new_individuals=list(),
-                 species_classes=list(),
-                 use_existing_results=True,
-                 max_population=100,
-                 picker_power=2.0
+                 species_set: Set[type],
+                 new_individuals: List[models.SpeciesBase] = list(),
+                 use_existing_results: bool = True,
+                 max_population: int = 100,
+                 keep_all:bool = True,
+                 picker_power: float = 2.0
                  ):
         """
         initialize the population
         
         :param new_individuals: a list of new SpeciesBase objects to add to the population
-        :param species_classes: a list of any classes not found in the new individuals list so ecosystem
+        :param species_set: a set of any classes not found in the new individuals list so ecosystem
         them from the existing results
         :param use_existing_results: if should use existing results if available and continue
         :param max_population: the maximum population to create, can be overridden by sum (species * offspring)
         :param picker_power: decay power, higher values favor more successful individuals, default 2
         :type new_individuals: list[SpeciesBase]
-        :type species_classes: list[type]
+        :type species_set: list[type]
         :type use_existing_results: bool
         :type max_population: int
         :type picker_power: float
@@ -424,16 +396,39 @@ class Ecosystem(object):
         self._max_population = max_population
         self._picker_power = picker_power
         self._print_output = False
+        self._keep_all = keep_all
+        self._species_set = species_set
+        self._working_generation = None
+        """
+        :type: models.Generation
+        """
 
         if use_existing_results:
-            existing = parse_generation(species_classes)
-            new_individuals.extend(existing[0])
-            self._generation_num = existing[1] + 1
-        else:
-            self._generation_num = 1
-            db.clear_db()
+            gen_num = models.Generation.get_current_generation_number()
 
-        self._working_generation = OneGeneration(new_individuals, self._max_population, self._picker_power)
+            if gen_num is None:
+                print('no existing results')
+                if len(new_individuals) < 2:
+                    print('not enough individuals to start')
+                    raise Exception('Not enough individuals to start')
+
+                self._working_generation = models.Generation()
+
+            else:
+                self._working_generation = db.sess.query(models.Generation).filter(
+                    models.Generation.gen_num == gen_num
+                ).first()
+                self._working_generation.fix_species_classes(self._species_set)
+
+        else:
+            db.clear_db()
+            if len(new_individuals) < 2:
+                print('not enough individuals to start')
+                raise Exception('Not enough individuals to start')
+            self._working_generation = models.Generation()
+
+        self._species_set = self._working_generation.add_individuals(new_individuals)
+        self._working_generation.save()
 
     def run(self, generation_limit=None, print_output=None):
         """
