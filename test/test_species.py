@@ -34,14 +34,6 @@ class ExampleSpecies(SpeciesBase):
 
 
 class SpeciesTest(TestCase):
-    # @staticmethod
-    # def get_first():
-    #     """
-    #
-    #     :return:
-    #     :rtype: models.SpeciesBase
-    #     """
-    #     return db.sess.query(models.SpeciesBase).first()
 
     @staticmethod
     def get_by_id(guid):
@@ -52,12 +44,7 @@ class SpeciesTest(TestCase):
         :rtype: ExampleSpecies
         """
 
-        g = db.sess.query(models.SpeciesBase).filter(
-            models.SpeciesBase._guid == guid
-        ).first()
-        g.__class__ = ExampleSpecies
-        g.__init__()
-        return g
+        return ExampleSpecies.get_by_guid(guid)
 
     @staticmethod
     def add_one():
@@ -87,12 +74,12 @@ class SpeciesTest(TestCase):
         ind = ExampleSpecies()
 
         ind._gen_num = 10
-        self.assertIsNone(ind._uid)
+        self.assertIsNone(ind.__uid)
         db.sess.add(ind)
         db.sess.commit()
 
         g = self.get_by_id(ind.guid)
-        self.assertIsNotNone(g._uid)
+        self.assertIsNotNone(g.__uid)
 
     def test_change_class(self):
         self.clear_inds()
