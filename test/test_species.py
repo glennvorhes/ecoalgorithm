@@ -34,6 +34,7 @@ class ExampleSpecies(SpeciesBase):
         return self.__class__(new_x, new_y)
 
 
+
 class SpeciesTest(TestCase):
 
     @staticmethod

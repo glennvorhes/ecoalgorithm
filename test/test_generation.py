@@ -66,7 +66,6 @@ class TestGeneration(TestCase):
         gen = db.sess.query(Generation).first()
         return gen
 
-
     def test_create_gen(self):
         return
         gen = self.new_generation
