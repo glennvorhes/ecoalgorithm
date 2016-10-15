@@ -57,7 +57,7 @@ class _DbConnect:
         """
 
         if not self._checked:
-            from . import models
+            from . import _models as models
             try:
                 sess.query(models.Generation).first()
             except exc.OperationalError:
@@ -73,7 +73,7 @@ class _DbConnect:
         self._checked = False
 
     def clear_db(self):
-        from . import models
+        from . import _models as models
         self.sess.query(models.SpeciesBase).delete()
         self.sess.commit()
         self.sess.query(models.Generation).delete()

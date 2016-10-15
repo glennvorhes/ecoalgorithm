@@ -8,6 +8,11 @@ from ecoalgorithm import models
 from ecoalgorithm import Ecosystem
 
 
+# TODO see what happens if there is only one
+
+
+
+
 max_population = 40
 offspring_count = 5
 gen_count = 40

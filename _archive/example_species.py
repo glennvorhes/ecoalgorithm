@@ -60,7 +60,6 @@ class Cat(CommonProblem):
         # print('dead Cat')
 
 
-
 class Fish(CommonProblem):
     def mate(self, other_individual):
             new_x = (random() - 0.5) * 10 + (self.x + other_individual.x) / 2

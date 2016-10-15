@@ -1,8 +1,9 @@
 from unittest import TestCase
-from ecoalgorithm.models import SpeciesBase
+from ecoalgorithm import SpeciesBase
 from random import random
 from ecoalgorithm.db_connect import db
-from ecoalgorithm import models
+# from ecoalgorithm import models
+import ecoalgorithm
 
 random_change = 2
 
@@ -30,7 +31,7 @@ class ExampleSpecies(SpeciesBase):
         else:
             new_y = other_individual.y + (random() - 0.5) * random_change
 
-        return ExampleSpecies(new_x, new_y)
+        return self.__class__(new_x, new_y)
 
 
 class SpeciesTest(TestCase):
@@ -62,7 +63,7 @@ class SpeciesTest(TestCase):
 
     @staticmethod
     def clear_inds():
-        db.sess.query(models.SpeciesBase).delete()
+        db.sess.query(SpeciesBase).delete()
         db.sess.commit()
 
     def setUp(self):
@@ -74,12 +75,12 @@ class SpeciesTest(TestCase):
         ind = ExampleSpecies()
 
         ind._gen_num = 10
-        self.assertIsNone(ind.__uid)
+        self.assertFalse(ind.is_in_db)
         db.sess.add(ind)
         db.sess.commit()
 
         g = self.get_by_id(ind.guid)
-        self.assertIsNotNone(g.__uid)
+        self.assertTrue(g.is_in_db)
 
     def test_change_class(self):
         self.clear_inds()
@@ -119,7 +120,7 @@ class SpeciesTest(TestCase):
         ind2.mature()
         db.sess.commit()
 
-        out_inds = models._breed(ind1, ind2)
+        out_inds = ecoalgorithm._breed(ind1, ind2)
         self.assertEqual(len(out_inds), ind2.get_offspring_count())
 
         total += ind2.get_offspring_count()
@@ -134,7 +135,7 @@ class SpeciesTest(TestCase):
         ind2.set_offspring_count(12)
         total += ind1.get_offspring_count()
 
-        out_inds = models._breed(ind2, ind1)
+        out_inds = ecoalgorithm._breed(ind2, ind1)
 
         for f in out_inds:
             f.mature()
@@ -143,7 +144,7 @@ class SpeciesTest(TestCase):
         db.sess.add_all(out_inds)
         db.sess.commit()
 
-        self.assertEqual(total, db.sess.query(models.SpeciesBase).count())
+        self.assertEqual(total, db.sess.query(SpeciesBase).count())
 
     def test_breed_assertions(self):
         self.clear_inds()
@@ -151,19 +152,19 @@ class SpeciesTest(TestCase):
         ind1 = self.add_one()
         ind2 = self.add_one()
         with self.assertRaises(AssertionError):
-            models._breed(ind1, ind2)
+            ecoalgorithm._breed(ind1, ind2)
 
         ind1.mature()
         ind2.mature()
 
-        models._breed(ind1, ind2)
+        ecoalgorithm._breed(ind1, ind2)
 
         ind1.success = None
         with self.assertRaises(AssertionError):
-            models._breed(ind1, ind2)
+            ecoalgorithm._breed(ind1, ind2)
 
         ind1.success = 10
-        models._breed(ind1, ind2)
+        ecoalgorithm._breed(ind1, ind2)
 
     def test_validate_class(self):
         self.assertTrue(ExampleSpecies.validate_class())
@@ -180,7 +181,7 @@ class SpeciesTest(TestCase):
         ind1.mature()
         ind2.mature()
 
-        out_list = models._breed(ind1, ind2)
+        out_list = ecoalgorithm._breed(ind1, ind2)
 
         for o in out_list:
             o._gen_num = 10

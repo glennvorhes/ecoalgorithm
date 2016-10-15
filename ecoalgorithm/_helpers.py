@@ -2,16 +2,17 @@ from unittest import TestCase
 import numpy as np
 from numpy.random import choice
 from collections import OrderedDict
-from . import _config
-
-import sqlalchemy
-
-from sqlalchemy.orm import relationship, Session
-from sqlalchemy import func
-from ecoalgorithm.species import SpeciesBase
-from sqlalchemy.orm import scoped_session, sessionmaker
-import atexit
-from ecoalgorithm import models
+# from . import _config
+#
+# import sqlalchemy
+#
+# from sqlalchemy.orm import relationship, Session
+# from sqlalchemy import func
+# from ecoalgorithm.species import SpeciesBase
+# from sqlalchemy.orm import scoped_session, sessionmaker
+# import atexit
+# from ecoalgorithm import models
+from ecoalgorithm.models import IndividualPicker
 #
 #
 # def individual_picker(ind_list, power=2):
@@ -50,57 +51,6 @@ from ecoalgorithm import models
 #             return choice(ind_list, p=wgt)
 #
 #     return pick_female
-
-
-class IndividualPicker:
-
-    def __init__(self, ind_list, power=2):
-        """
-        Make a chooser function in a closure
-
-        :param ind_list: the items to be potentially picked
-        :type ind_list: list[SpeciesBase]
-        :param power: the power to which the picker decay function should be, use exp if not provided
-        :type power: float|None
-        """
-
-        self._ind_list = [i for i in ind_list if i.is_alive]
-
-        self._ind_list.sort(key=lambda x: x.success, reverse=True)
-        self._wgt = np.linspace(-1, 0, len(self._ind_list) + 1)
-
-        self._wgt *= -1
-
-        self._wgt **= power
-        self._wgt = self._wgt[:-1]
-        self._wgt /= np.sum(self._wgt)
-
-    def pick_female(self):
-        """
-        Make weighted selection
-
-        :return: the selection
-        :rtype: SpeciesBase
-        """
-
-        if self.num_alive == 0:
-            return None
-        else:
-            return choice(self._ind_list, p=self._wgt)
-
-    def pick_male(self, female):
-
-        ix_female = self._ind_list.index(female)
-
-        no_female = [self._ind_list[i] for i in range(len(self._ind_list)) if i != ix_female]
-        no_female_weight = [self._wgt[i] for i in range(len(self._wgt)) if i != ix_female]
-        no_female_weight /= np.sum(no_female_weight)
-
-        return choice(no_female, p=no_female_weight)
-
-    @property
-    def num_alive(self):
-        return len(self._ind_list)
 
 
 def picker_power_iterations(power, itr):
