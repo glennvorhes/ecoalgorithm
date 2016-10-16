@@ -16,21 +16,21 @@ from multiprocessing.dummy import Pool as ThreadPool
 from multiprocessing import cpu_count
 
 urls = [
-  'http://www.python.org',
-  'http://www.python.org/about/',
-  'http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html',
-  'http://www.python.org/doc/',
-  'http://www.python.org/download/',
-  'http://www.python.org/getit/',
-  'http://www.python.org/community/',
-  'https://wiki.python.org/moin/',
-  'http://planet.python.org/',
-  'https://wiki.python.org/moin/LocalUserGroups',
-  'http://www.python.org/psf/',
-  'http://docs.python.org/devguide/',
-  'http://www.python.org/community/awards/'
-  # etc..
-  ]
+    'http://www.python.org',
+    'http://www.python.org/about/',
+    'http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html',
+    'http://www.python.org/doc/',
+    'http://www.python.org/download/',
+    'http://www.python.org/getit/',
+    'http://www.python.org/community/',
+    'https://wiki.python.org/moin/',
+    'http://planet.python.org/',
+    'https://wiki.python.org/moin/LocalUserGroups',
+    'http://www.python.org/psf/',
+    'http://docs.python.org/devguide/',
+    'http://www.python.org/community/awards/'
+    # etc..
+]
 
 # # Make the Pool of workers
 # pool = ThreadPool(4)
@@ -47,7 +47,6 @@ Base = declarative_base()
 
 
 class IndividualPicker:
-
     def __init__(self, ind_list: List['SpeciesBase'], power=2):
         """
         Make a chooser function in a closure
@@ -373,6 +372,8 @@ class SpeciesBase(Base):
 
     _offspring_count = 5
 
+    _validated = False
+
     __table_args__ = (
         sqlalchemy.Index('ix_gen_success', '_gen_num', '_success'),
         {'sqlite_autoincrement': True},
@@ -406,14 +407,18 @@ class SpeciesBase(Base):
 
         :return:
         """
+
+        if cls._validated:
+            return True
+
         ind1 = cls()
         ind2 = cls()
 
         ind1.mature()
         ind2.mature()
 
-        assert ind1._success_set
-        assert ind2._success_set
+        assert ind1.is_mature
+        assert ind2.is_mature
 
         if not ind1.is_alive:
             ind1.success = 10
@@ -423,16 +428,20 @@ class SpeciesBase(Base):
 
         progeny = _breed(ind1, ind2)
 
-        assert len(progeny) == ind1.get_offspring_count()
+        assert len(progeny) == cls._offspring_count
 
         for p in progeny:
             try:
                 assert p.class_name == cls.__name__
             except AssertionError:
-                raise AssertionError('mate must return offspring of the same class: ' + cls.__name__ + " returned " + p.class_name)
+                raise AssertionError('mate must return offspring of the same class: {0} returned {1}'.format(
+                    cls.__name__, p.class_name
+                ))
 
         print("class '{0}' successfully verified".format(ind1.class_name))
-        return True
+
+        cls._validated = True
+        return cls._validated
 
     @classmethod
     def cls(cls):
@@ -576,7 +585,6 @@ class SpeciesBase(Base):
     @property
     def db_class_name(self) -> str:
         return self._class_name
-
 
     @property
     def gen_num(self) -> int or None:

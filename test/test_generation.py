@@ -1,35 +1,9 @@
 from unittest import TestCase
 from test.test_species import ExampleSpecies
 from ecoalgorithm.db_connect import db
-from ecoalgorithm import  Ecosystem, SpeciesBase
+from ecoalgorithm import Ecosystem, SpeciesBase
 from ecoalgorithm._models import Generation
-
-
-class Cat(ExampleSpecies):
-    pass
-    # def __init__(self):
-    #     super().__init__()
-
-
-class Dog(ExampleSpecies):
-    pass
-    # def __init__(self):
-    #     super().__init__()
-
-
-class Fish(ExampleSpecies):
-    pass
-    # def __init__(self):
-    #     super().__init__()
-
-
-class DeadFish(ExampleSpecies):
-
-    # def __init__(self):
-    #     super().__init__()
-
-    def mature(self):
-        self.success = None
+from test.example_species import Cat, Dog, Fish, DeadFish
 
 Cat.validate_class()
 Dog.validate_class()
