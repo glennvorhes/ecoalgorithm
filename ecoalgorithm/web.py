@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for, render_template
 from ecoalgorithm.db_connect import db
-from ecoalgorithm import models
+from ecoalgorithm import _models as models
 from ._config import config
 import sqlalchemy
 
@@ -88,9 +88,11 @@ def profile(gen_num):
     # print(type(user_id))
     return str(3)
 
-def start_web_server():
-    app.run(port=config.web_port, debug=config.web_debug)
+def start_web_server(port: int = None, debug: bool = None):
+    port = config.web_port if type(port) is not int else port
+    debug = config.web_debug if type(debug) is not bool else debug
+    app.run(port=port, debug=debug)
 
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run(port=5001, debug=True)

@@ -73,14 +73,19 @@ class SpeciesBase(Base):
         if cls._validated:
             return True
 
+        if not issubclass(cls, SpeciesBase):
+            raise AssertionError("'{0}' is not subclass of {1}".format(
+                cls.__name__, SpeciesBase.__name__
+            ))
+
         ind1 = cls()
         ind2 = cls()
 
         ind1.mature()
         ind2.mature()
 
-        assert ind1.is_mature
-        assert ind2.is_mature
+        if not ind1.is_mature or not ind2.is_mature:
+            raise AssertionError("'success' property not set in {0} class mature method".format(cls.__name__))
 
         if not ind1.is_alive:
             ind1.success = 10
@@ -100,14 +105,8 @@ class SpeciesBase(Base):
                     cls.__name__, p.class_name
                 ))
 
-        print("class '{0}' successfully verified".format(ind1.class_name))
-
         cls._validated = True
         return cls._validated
-
-    @classmethod
-    def cls(cls):
-        return cls
 
     def __init__(self):
         """
@@ -357,8 +356,8 @@ class Generation(Base):
 
     def __init__(self,
                  species_set: Set[type],
-                 picker_power: float = 2.0,
-                 multithread: bool = True):
+                 picker_power: float,
+                 multithread: bool):
         """
         create a new generation
 
@@ -401,7 +400,7 @@ class Generation(Base):
                 power=self._picker_power
             ) for k in self._species_lookup.keys()}
         """
-        :type: Dict[str, IndividualPicker]
+        :type: Dict[str, _helpers.IndividualPicker]
         """
 
         self._next_gen_individuals = []
@@ -430,15 +429,20 @@ class Generation(Base):
 
         return self._species_set
 
-    def populate_next_generation(self, max_population: int = 100, keep_all: bool = True):
+    def populate_next_generation(self, max_population, keep_all) -> bool:
+
+        if not self._all_species_picker.has_two_alive and not keep_all:
+            """
+            No successful individuals
+            """
+            return False
+
         if keep_all:
             for class_name, picker in self._by_species_picker.items():
                 if picker.has_two_alive:
                     female = picker.pick_female()
                     male = picker.pick_male(female)
-                    # print(male, female)
                     progeny = _helpers.breed(female, male)
-                    # print(progeny[0].class_name)
                     if len(progeny) > 2:
                         progeny = progeny[:2]
                     self._next_gen_individuals.extend(progeny)
@@ -446,12 +450,6 @@ class Generation(Base):
                     # create two new individuals using the class constructor
                     self._next_gen_individuals.append(self._species_lookup[class_name]())
                     self._next_gen_individuals.append(self._species_lookup[class_name]())
-
-        if not self._all_species_picker.has_two_alive and not keep_all:
-            """
-            No successful individuals
-            """
-            exit()
 
         if not self._all_species_picker.has_two_alive:
             while len(self._next_gen_individuals) < max_population:
@@ -471,13 +469,14 @@ class Generation(Base):
         if len(self._next_gen_individuals) > max_population:
             self._next_gen_individuals = self._next_gen_individuals[:max_population]
 
-    def save(self):
-        if len(self.individuals) < 2:
-            raise AssertionError('there must be at least two individuals in the generation')
+        return True
 
-        for ind in self.individuals:
-            if not ind.is_mature:
-                ind.mature()
+    def save(self):
+
+        if len(self.individuals) == 0:
+            raise AssertionError('there must at least one individual in the generation')
+
+        _helpers.mature_all(self.individuals, self._multithread)
 
         if self.uid is None:
             db.sess.add(self)
@@ -497,12 +496,54 @@ class Generation(Base):
         return None if best_ind is None else best_ind.success
 
     @property
+    def summary_short(self):
+        best = self.best_individual
+        if best:
+            return "Generation {0}. Best: {1}, success: {2}\n\t{3}".format(
+                self.gen_num, best.class_name, best.success,
+                dict(best.params)
+            )
+        else:
+            return "Generation {0}. None Successful".format(
+                self.gen_num
+            )
+
+    @property
+    def summary_long(self):
+        out_string = "Generation {0}\n".format(self.gen_num)
+
+        # print(self._by_species_picker)
+
+        best_list = []
+        none_list = []
+
+        for k, v in self._by_species_picker.items():
+            best = v.best_individual
+            if best:
+                best_list.append((k, best.success, dict(best.params), v.count_all, v.count_alive, v.count_dead))
+            else:
+                none_list.append((k, v.count_all, v.count_alive, v.count_dead))
+
+        best_list.sort(key=lambda x: x[1], reverse=True)
+
+        for b in best_list:
+            out_string += "\t{0}, success: {1}, {2}\n\t\tPopulation count: {3}, alive: {4}, dead: {5}\n".format(*b)
+
+        for n in none_list:
+            out_string += "\t{0}, None Successful\n\t\tPopulation count: {1}, alive: {2}, dead: {3}\n".format(*n)
+
+        return out_string
+
+    @property
     def individuals(self) -> List[SpeciesBase]:
 
         for ind in self._individuals:
             if ind.class_name == SpeciesBase.__name__:
-                ind.__class__ = self._species_lookup[ind.db_class_name]
-                ind.__init__()
+                try:
+                    ind.__class__ = self._species_lookup[ind.db_class_name]
+                    ind.__init__()
+                except KeyError:
+                    raise KeyError('Class {0} not found in species set'.format(ind.db_class_name))
 
         return self._individuals
 
@@ -515,7 +556,7 @@ class Generation(Base):
 
             _helpers.mature_all(self._next_gen_individuals, self._multithread)
 
-            self._next_generation = Generation(self._species_set, self._picker_power)
+            self._next_generation = Generation(self._species_set, self._picker_power, self._multithread)
             self._next_generation.add_individuals(self._next_gen_individuals)
             self._next_generation.save()
 

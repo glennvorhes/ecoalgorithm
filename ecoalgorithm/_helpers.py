@@ -1,12 +1,16 @@
-from unittest import TestCase
 import numpy as np
 from numpy.random import choice
-from collections import OrderedDict
-# from ecoalgorithm._models import SpeciesBase
 import ecoalgorithm
 from typing import List
 from multiprocessing.dummy import Pool as ThreadPool
 from multiprocessing import cpu_count
+from enum import Enum
+
+
+class ShowOutput(Enum):
+    NONE = 0
+    SHORT = 1
+    LONG = 2
 
 
 def breed(
@@ -85,6 +89,8 @@ class IndividualPicker:
         for j in ind_list:
             assert j.is_mature
 
+        self._ind_list_all = ind_list
+
         self._ind_list = [i for i in ind_list if i.is_alive]
 
         self._ind_list.sort(key=lambda x: x.success, reverse=True)
@@ -124,14 +130,30 @@ class IndividualPicker:
 
     @property
     def has_two_alive(self) -> bool:
-        return len(self._ind_list) > 1
+        return self.count_alive > 1
 
     @property
     def best_individual(self) -> 'SpeciesBase':
-        if len(self._ind_list) > 0:
+        if self.count_alive > 0:
             return self._ind_list[0]
         else:
             return None
+
+    @property
+    def count_alive(self) -> int:
+        return len(self._ind_list)
+
+    @property
+    def count_dead(self) -> int:
+        return self.count_all - self.count_alive
+
+    @property
+    def count_all(self) -> int:
+        return len(self._ind_list_all)
+
+
+
+
 
 # from . import _config
 #

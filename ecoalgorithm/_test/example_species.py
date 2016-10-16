@@ -2,7 +2,7 @@ from random import random
 from ecoalgorithm import SpeciesBase
 
 
-random_change = 2
+_random_change = 2
 
 
 class ExampleSpecies(SpeciesBase):
@@ -20,40 +20,71 @@ class ExampleSpecies(SpeciesBase):
 
     def mate(self, other_individual):
         if random() > 0.5:
-            new_x = self.x + (random() - 0.5) * random_change
+            new_x = self.x + (random() - 0.5) * _random_change
         else:
-            new_x = other_individual.x + (random() - 0.5) * random_change
+            new_x = other_individual.x + (random() - 0.5) * _random_change
         if random() > 0.5:
-            new_y = self.y + (random() - 0.5) * random_change
+            new_y = self.y + (random() - 0.5) * _random_change
         else:
-            new_y = other_individual.y + (random() - 0.5) * random_change
+            new_y = other_individual.y + (random() - 0.5) * _random_change
 
         return self.__class__(new_x, new_y)
 
 
-
 class Cat(ExampleSpecies):
     pass
-    # def __init__(self):
-    #     super().__init__()
 
 
 class Dog(ExampleSpecies):
     pass
-    # def __init__(self):
-    #     super().__init__()
 
 
 class Fish(ExampleSpecies):
     pass
-    # def __init__(self):
-    #     super().__init__()
 
 
 class DeadFish(ExampleSpecies):
 
-    # def __init__(self):
-    #     super().__init__()
-
     def mature(self):
         self.success = None
+
+
+class Snake(ExampleSpecies):
+    pass
+
+
+class Racoon(ExampleSpecies):
+
+    def mature(self):
+        pass
+
+
+
+def get_some_inds():
+
+    some_individuals = []
+
+    for i in range(4):
+        some_individuals.append(Cat())
+        some_individuals.append(Dog())
+        some_individuals.append(Fish())
+        some_individuals.append(DeadFish())
+
+    return some_individuals
+
+
+def get_some_inds_len():
+    return len(get_some_inds())
+
+
+def get_species_set():
+    species_set = {Fish, Cat, Dog, DeadFish}
+
+    Fish._validated = False
+    Cat._validated = False
+    Dog._validated = False
+    DeadFish._validated = False
+    return species_set
+
+
+__all__ = [get_species_set, get_some_inds, get_some_inds_len, Dog, Cat, Fish, DeadFish, ExampleSpecies]

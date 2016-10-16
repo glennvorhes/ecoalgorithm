@@ -1,7 +1,7 @@
 from ecoalgorithm.db_connect import db
 from .. import Ecosystem, SpeciesBase
 from .._models import Generation
-from .example_species import Cat, Dog, Fish, DeadFish
+from .example_species import Cat, Dog, Fish, DeadFish, get_some_inds, get_species_set
 from unittest import TestCase
 
 
@@ -16,21 +16,15 @@ def species_base_count(gen: Generation) -> int:
 
 
 class TestGeneration(TestCase):
-    species_set = {Fish, Cat, Dog, DeadFish}
+    # species_set = {Fish, Cat, Dog, DeadFish}
 
     def setUp(self):
+        db.clear_db()
         self.eco = None
 
     def create_new(self):
 
-        some_inds = []
-        for i in range(4):
-            some_inds.append(Cat())
-            some_inds.append(Dog())
-            some_inds.append(Fish())
-            some_inds.append(DeadFish())
-
-        self._eco = Ecosystem(self.species_set, some_inds, use_existing_results=False)
+        self._eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
 
     def make_new_generation(self) -> Generation:
         if self.eco is None:
@@ -57,26 +51,28 @@ class TestGeneration(TestCase):
 
     def test_next_gen(self):
         max_pop = 200
+        keep_all = True
         gen = self.db_generation
 
         with self.assertRaises(AssertionError):
             gen = gen.next_generation
 
-        gen.populate_next_generation(max_pop)
+        gen.populate_next_generation(max_pop, keep_all)
         gen = gen.next_generation
 
-        gen.populate_next_generation(max_pop)
+        gen.populate_next_generation(max_pop, keep_all)
         gen = gen.next_generation
 
-        gen.populate_next_generation(max_pop)
+        gen.populate_next_generation(max_pop, keep_all)
         gen = gen.next_generation
         self.assertIsNotNone(gen.gen_num)
 
     def test_a_bunch(self):
         max_pop = 20
+        keep_all = True
         gen = self.db_generation
 
         for i in range(20):
-            gen.populate_next_generation(max_pop)
-            print(gen.best_success)
+            gen.populate_next_generation(max_pop, keep_all)
+            # print(gen.best_success)
             gen = gen.next_generation

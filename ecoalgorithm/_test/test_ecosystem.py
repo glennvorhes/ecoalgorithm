@@ -1,81 +1,120 @@
 from ecoalgorithm.db_connect import db
 from .. import Ecosystem, SpeciesBase
-from .._models import Generation
-from .example_species import Cat, Dog, Fish, DeadFish
+from .example_species import Cat, Dog, Fish, DeadFish, Snake, Racoon, get_some_inds, get_species_set, get_some_inds_len, ExampleSpecies
 from unittest import TestCase
-
-Cat.validate_class()
-Dog.validate_class()
-Fish.validate_class()
-DeadFish.validate_class()
+from typing import List
+from .. import ShowOutput
 
 
-def species_base_count(gen: Generation) -> int:
-    return len([ind for ind in gen.individuals if ind.class_name == SpeciesBase.__name__])
+def get_eco_inds(eco: Ecosystem) -> List[SpeciesBase]:
+    return eco._working_generation.individuals
 
 
-class TestGeneration(TestCase):
-    species_set = {Fish, Cat, Dog, DeadFish}
+def get_eco_inds_len(eco: Ecosystem) -> int:
+    return len(get_eco_inds(eco))
 
-    def setUp(self):
-        self.eco = None
 
-    def create_new(self):
+class TestEcosystem(TestCase):
 
-        some_inds = []
-        for i in range(4):
-            some_inds.append(Cat())
-            some_inds.append(Dog())
-            some_inds.append(Fish())
-            some_inds.append(DeadFish())
+    def test_create_no_existing(self):
+        # return
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
+        self.assertEqual(get_eco_inds_len(eco), get_some_inds_len())
 
-        self._eco = Ecosystem(self.species_set, some_inds, use_existing_results=False)
-
-    def make_new_generation(self) -> Generation:
-        if self.eco is None:
-            self.create_new()
-        return self._eco.working_generation
-
-    @property
-    def new_generation(self) -> Generation:
-        return self.make_new_generation()
-
-    @property
-    def db_generation(self) -> Generation:
-        self.make_new_generation()
-        gen = db.sess.query(Generation).first()
-        return gen
-
-    def test_create_gen(self):
-        gen = self.new_generation
-        self.assertEqual(species_base_count(gen), 0)
-
-    def test_gen_from_db(self):
-        gen = self.db_generation
-        self.assertEqual(species_base_count(gen), 0)
-
-    def test_next_gen(self):
-        max_pop = 200
-        gen = self.db_generation
-
+    def test_class_validation(self):
+        # return
         with self.assertRaises(AssertionError):
-            gen = gen.next_generation
+            Ecosystem({Snake, Fish, Racoon})
 
-        gen.populate_next_generation(max_pop)
-        gen = gen.next_generation
+    def test_recover_existing(self):
+        # return
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
+        self.assertEqual(get_eco_inds_len(eco), get_some_inds_len())
+        eco = Ecosystem(get_species_set())
+        self.assertEqual(get_eco_inds_len(eco), get_some_inds_len())
+        eco = Ecosystem(get_species_set(), [Cat(), Cat()])
+        self.assertEqual(get_eco_inds_len(eco), get_some_inds_len() + 2)
 
-        gen.populate_next_generation(max_pop)
-        gen = gen.next_generation
+    def test_add_not_in_set(self):
+        # return
+        inds = get_some_inds()
+        inds.append(Snake())
+        inds.append(Snake())
+        inds.append(Snake())
+        inds.append(Snake())
+        Ecosystem(get_species_set(), inds, use_existing=False)
 
-        gen.populate_next_generation(max_pop)
-        gen = gen.next_generation
-        self.assertIsNotNone(gen.gen_num)
+        with self.assertRaises(KeyError):
+            Ecosystem(get_species_set())
 
-    def test_a_bunch(self):
-        max_pop = 20
-        gen = self.db_generation
+        Ecosystem(get_species_set(), [Snake(), Snake()])
 
-        for i in range(20):
-            gen.populate_next_generation(max_pop)
-            print(gen.best_success)
-            gen = gen.next_generation
+    def test_add_empty(self):
+        # return
+        Ecosystem(get_species_set(), [Snake()], use_existing=False)
+
+    def test_add_empty_no_ind(self):
+        # return
+        with self.assertRaises(AssertionError):
+            Ecosystem(get_species_set(), [], use_existing=False)
+
+    def test_thinks_existing(self):
+        # return
+        with self.assertRaises(AssertionError):
+            Ecosystem(get_species_set(), use_existing=False)
+
+        Ecosystem(get_species_set(), [Snake()])
+        db.clear_db()
+        Ecosystem(get_species_set(), get_some_inds(), use_existing=True)
+
+    def test_start_run(self):
+        # return
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10)
+        eco.run(5)
+        eco = Ecosystem(get_species_set(), max_population=10)
+        eco.run(5)
+
+    def test_keep_all(self):
+        # return
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10, )
+        eco.run(2)
+        inds = get_eco_inds(eco)
+        dead_fish = [ind for ind in inds if type(ind) is DeadFish]
+        self.assertEqual(len(dead_fish), 2)
+
+    def test_not_keep_all(self):
+        # return
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10, keep_all=False)
+        eco.run(2)
+        inds = get_eco_inds(eco)
+        dead_fish = [ind for ind in inds if type(ind) is DeadFish]
+        self.assertEqual(len(dead_fish), 0)
+
+    def test_keep_all_all_dead(self):
+        # return
+        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, max_population=10, )
+        eco.run(3)
+        inds = get_eco_inds(eco)
+        print(inds)
+
+    def test_not_keep_all_all_dead(self):
+        # return
+        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, max_population=10, keep_all=False)
+        eco.run(3)
+        # inds = get_eco_inds(eco)
+
+    def test_show_output(self):
+        # return
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10)
+
+        eco.run(3, ShowOutput.SHORT)
+        eco.run(3, ShowOutput.LONG)
+
+    def test_bail_on_dead(self):
+        # return
+        eco = Ecosystem({DeadFish}, [DeadFish()], use_existing=False, max_population=10)
+        eco.run(20)
+
+    def test_threshold(self):
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=50)
+        eco.run(100, ShowOutput.SHORT, break_threshold=1)
