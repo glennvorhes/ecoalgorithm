@@ -1,9 +1,8 @@
-from unittest import TestCase
-from test.test_species import ExampleSpecies
 from ecoalgorithm.db_connect import db
-from ecoalgorithm import Ecosystem, SpeciesBase
-from ecoalgorithm._models import Generation
-from test.example_species import Cat, Dog, Fish, DeadFish
+from .. import Ecosystem, SpeciesBase
+from .._models import Generation
+from .example_species import Cat, Dog, Fish, DeadFish
+from unittest import TestCase
 
 Cat.validate_class()
 Dog.validate_class()
@@ -22,36 +21,40 @@ class TestGeneration(TestCase):
         self.eco = None
 
     def create_new(self):
-        some_inds = [Cat() for i in range(4)]
-        some_inds.extend([Dog() for i in range(4)])
-        some_inds.extend([Fish() for i in range(4)])
-        some_inds.extend([DeadFish() for i in range(4)])
+
+        some_inds = []
+        for i in range(4):
+            some_inds.append(Cat())
+            some_inds.append(Dog())
+            some_inds.append(Fish())
+            some_inds.append(DeadFish())
+
         self._eco = Ecosystem(self.species_set, some_inds, use_existing_results=False)
 
-    @property
-    def new_generation(self) -> Generation:
+    def make_new_generation(self) -> Generation:
         if self.eco is None:
             self.create_new()
         return self._eco.working_generation
 
     @property
+    def new_generation(self) -> Generation:
+        return self.make_new_generation()
+
+    @property
     def db_generation(self) -> Generation:
-        gen = self.new_generation
+        self.make_new_generation()
         gen = db.sess.query(Generation).first()
         return gen
 
     def test_create_gen(self):
-        return
         gen = self.new_generation
         self.assertEqual(species_base_count(gen), 0)
 
     def test_gen_from_db(self):
-        return
         gen = self.db_generation
         self.assertEqual(species_base_count(gen), 0)
 
     def test_next_gen(self):
-        return
         max_pop = 200
         gen = self.db_generation
 
@@ -66,6 +69,7 @@ class TestGeneration(TestCase):
 
         gen.populate_next_generation(max_pop)
         gen = gen.next_generation
+        self.assertIsNotNone(gen.gen_num)
 
     def test_a_bunch(self):
         max_pop = 20
@@ -75,6 +79,3 @@ class TestGeneration(TestCase):
             gen.populate_next_generation(max_pop)
             print(gen.best_success)
             gen = gen.next_generation
-
-
-

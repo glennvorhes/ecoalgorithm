@@ -1,10 +1,8 @@
-from unittest import TestCase
+from .example_species import ExampleSpecies
 from ecoalgorithm import SpeciesBase
-from random import random
+from unittest import TestCase
 from ecoalgorithm.db_connect import db
-# from ecoalgorithm import models
-import ecoalgorithm
-from test.example_species import ExampleSpecies
+from .. import _helpers
 
 
 class SpeciesTest(TestCase):
@@ -93,7 +91,7 @@ class SpeciesTest(TestCase):
         ind2.mature()
         db.sess.commit()
 
-        out_inds = ecoalgorithm._breed(ind1, ind2)
+        out_inds = _helpers.breed(ind1, ind2)
         self.assertEqual(len(out_inds), ind2.get_offspring_count())
 
         total += ind2.get_offspring_count()
@@ -108,7 +106,7 @@ class SpeciesTest(TestCase):
         ind2.set_offspring_count(12)
         total += ind1.get_offspring_count()
 
-        out_inds = ecoalgorithm._breed(ind2, ind1)
+        out_inds = _helpers.breed(ind2, ind1)
 
         for f in out_inds:
             f.mature()
@@ -125,19 +123,19 @@ class SpeciesTest(TestCase):
         ind1 = self.add_one()
         ind2 = self.add_one()
         with self.assertRaises(AssertionError):
-            ecoalgorithm._breed(ind1, ind2)
+            _helpers.breed(ind1, ind2)
 
         ind1.mature()
         ind2.mature()
 
-        ecoalgorithm._breed(ind1, ind2)
+        _helpers.breed(ind1, ind2)
 
         ind1.success = None
         with self.assertRaises(AssertionError):
-            ecoalgorithm._breed(ind1, ind2)
+            _helpers.breed(ind1, ind2)
 
         ind1.success = 10
-        ecoalgorithm._breed(ind1, ind2)
+        _helpers.breed(ind1, ind2)
 
     def test_validate_class(self):
         self.assertTrue(ExampleSpecies.validate_class())
@@ -154,7 +152,7 @@ class SpeciesTest(TestCase):
         ind1.mature()
         ind2.mature()
 
-        out_list = ecoalgorithm._breed(ind1, ind2)
+        out_list = _helpers.breed(ind1, ind2)
 
         for o in out_list:
             o._gen_num = 10
