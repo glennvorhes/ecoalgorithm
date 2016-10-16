@@ -11,39 +11,40 @@ app = Flask(__name__)
 @app.route('/summary')
 def summary():
     out_str = ''
-    generations = db.sess.query(models.DbGeneration).order_by(sqlalchemy.desc(models.DbGeneration.gen_num))
-    """
-    :type: list[models.DbGeneration]
-    """
-
-    out_tuples = []
-
-    for g in generations:
-        print(g.individuals)
-        # best = g.individuals[0]
-        out_tuples.append((g.gen_num, None, None))
-
-    # for g in gens:
-    #     assert isinstance(g, models.DbGeneration)
-    #     """
-    #     :type: models.DbGeneration
-    #     """
+    # generations = db.sess.query(models.Generation).order_by(sqlalchemy.desc(models.Generation.gen_num))
+    # """
+    # :type: list[models.Generation]
+    # """
     #
-    #     out_str += 'Generation {0}<br>'.format(g.gen_num)
+    # out_tuples = []
+    #
+    # for g in generations:
+    #     print(g.individuals)
+    #     # best = g.individuals[0]
+    #     out_tuples.append((g.gen_num, None, None))
+    #
+    # # for g in gens:
+    # #     assert isinstance(g, models.DbGeneration)
+    # #     """
+    # #     :type: models.DbGeneration
+    # #     """
+    # #
+    # #     out_str += 'Generation {0}<br>'.format(g.gen_num)
+    #
+    # gen_summary = db.sess.query(
+    #     models.SpeciesBase.gen_num,
+    #     sqlalchemy.func.max(models.SpeciesBase.success),
+    #     models.SpeciesBase.class_name,
+    #     sqlalchemy.func.count(models.SpeciesBase.class_name)
+    # ).group_by(
+    #     models.SpeciesBase.gen_num,
+    #     models.SpeciesBase.class_name
+    # ).order_by(
+    #     sqlalchemy.desc(models.SpeciesBase.gen_num),
+    #     sqlalchemy.asc(models.SpeciesBase.class_name)
+    # )
 
-    gen_summary = db.sess.query(
-        models.SpeciesBase.gen_num,
-        sqlalchemy.func.max(models.SpeciesBase.success),
-        models.SpeciesBase.class_name,
-        sqlalchemy.func.count(models.SpeciesBase.class_name)
-    ).group_by(
-        models.SpeciesBase.gen_num,
-        models.SpeciesBase.class_name
-    ).order_by(
-        sqlalchemy.desc(models.SpeciesBase.gen_num),
-        sqlalchemy.asc(models.SpeciesBase.class_name)
-    )
-
+    return render_template('summary.html')
     return render_template('summary.html', generations=generations)
     for g in gen_summary:
         print(g)
