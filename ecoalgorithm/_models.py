@@ -354,10 +354,7 @@ class Generation(Base):
         last = db.sess.query(cls.gen_num).order_by(sqlalchemy.desc(cls.gen_num)).first()
         return None if last is None else last[0]
 
-    def __init__(self,
-                 species_set: Set[type],
-                 picker_power: float,
-                 multithread: bool):
+    def __init__(self, species_set: Set[SpeciesBase.__class__], multithread: bool):
         """
         create a new generation
 
@@ -368,8 +365,6 @@ class Generation(Base):
         :type: Generation
         """
 
-        self._picker_power = picker_power
-
         self._multithread = multithread
 
         if self.uid is None:
@@ -379,26 +374,25 @@ class Generation(Base):
 
         self._species_set = species_set
         """
-        :type: set[type]
+        :type: set[SpeciesBase.__class__]
         """
 
         self._species_lookup = {}
         """
-        :type: dict[str, type]
+        :type: dict[str, SpeciesBase.__class__]
         """
+
 
         for c in self._species_set:
             if c.__name__ == SpeciesBase.__name__:
                 raise Exception('Cannot add Species base to set')
             self._species_lookup[c.__name__] = c
 
-        self._all_species_picker = _helpers.IndividualPicker(self.individuals, self._picker_power)
+        self._all_species_picker = _helpers.IndividualPicker(self.individuals)
 
         self._by_species_picker = {
             k: _helpers.IndividualPicker(
-                [ind for ind in self.individuals if ind.class_name == k],
-                power=self._picker_power
-            ) for k in self._species_lookup.keys()}
+                [ind for ind in self.individuals if ind.class_name == k]) for k in self._species_lookup.keys()}
         """
         :type: Dict[str, _helpers.IndividualPicker]
         """
@@ -425,7 +419,7 @@ class Generation(Base):
 
         _helpers.mature_all(new_individuals, self._multithread)
 
-        self.__init__(self._species_set, self._picker_power, self._multithread)
+        self.__init__(self._species_set, self._multithread)
 
         return self._species_set
 
@@ -442,14 +436,14 @@ class Generation(Base):
                 if picker.has_two_alive:
                     female = picker.pick_female()
                     male = picker.pick_male(female)
+                    male.get_offspring_count()
                     progeny = _helpers.breed(female, male)
-                    if len(progeny) > 2:
-                        progeny = progeny[:2]
                     self._next_gen_individuals.extend(progeny)
                 else:
-                    # create two new individuals using the class constructor
-                    self._next_gen_individuals.append(self._species_lookup[class_name]())
-                    self._next_gen_individuals.append(self._species_lookup[class_name]())
+                    # create new individuals using the class constructor
+                    the_class = self._species_lookup[class_name]
+                    for i in range(the_class.get_offspring_count()):
+                        self._next_gen_individuals.append(the_class())
 
         if not self._all_species_picker.has_two_alive:
             while len(self._next_gen_individuals) < max_population:
@@ -556,7 +550,7 @@ class Generation(Base):
 
             _helpers.mature_all(self._next_gen_individuals, self._multithread)
 
-            self._next_generation = Generation(self._species_set, self._picker_power, self._multithread)
+            self._next_generation = Generation(self._species_set, self._multithread)
             self._next_generation.add_individuals(self._next_gen_individuals)
             self._next_generation.save()
 

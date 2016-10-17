@@ -75,22 +75,22 @@ class TestEcosystem(TestCase):
 
     def test_start_run(self):
         # return
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10)
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=20)
         eco.run(5)
-        eco = Ecosystem(get_species_set(), max_population=10)
+        eco = Ecosystem(get_species_set(), max_population=20)
         eco.run(5)
 
     def test_keep_all(self):
         # return
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10, )
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=20, )
         eco.run(2)
         inds = get_eco_inds(eco)
         dead_fish = [ind for ind in inds if type(ind) is DeadFish]
-        self.assertEqual(len(dead_fish), 2)
+        self.assertEqual(len(dead_fish), DeadFish.get_offspring_count())
 
     def test_not_keep_all(self):
         # return
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10, keep_all=False)
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=20, keep_all=False)
         eco.run(2)
         inds = get_eco_inds(eco)
         dead_fish = [ind for ind in inds if type(ind) is DeadFish]
@@ -98,27 +98,27 @@ class TestEcosystem(TestCase):
 
     def test_keep_all_all_dead(self):
         # return
-        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, max_population=10, )
+        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, max_population=20, )
         eco.run(3)
         inds = get_eco_inds(eco)
         print(inds)
 
     def test_not_keep_all_all_dead(self):
         # return
-        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, max_population=10, keep_all=False)
+        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, max_population=20, keep_all=False)
         eco.run(3)
         # inds = get_eco_inds(eco)
 
     def test_show_output(self):
         # return
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10)
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=20)
 
         eco.run(3, ShowOutput.SHORT)
         eco.run(3, ShowOutput.LONG)
 
     def test_bail_on_dead(self):
         # return
-        eco = Ecosystem({DeadFish}, [DeadFish()], use_existing=False, max_population=10)
+        eco = Ecosystem({DeadFish}, [DeadFish()], use_existing=False, max_population=20)
         eco.run(20)
 
     def test_threshold(self):

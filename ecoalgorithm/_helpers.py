@@ -7,6 +7,7 @@ from multiprocessing import cpu_count
 from enum import Enum
 from collections import defaultdict, OrderedDict
 import json
+import math
 
 
 class ShowOutput(Enum):
@@ -74,6 +75,7 @@ def mature_all(ind_list: List['ecoalgorithm.SpeciesBase'], multi_thread: bool = 
         for ind in ind_list:
             ind.mature()
 
+
 def _parse_count_dict(count_dict: Dict['ecoalgorithm.SpeciesBase', int]):
 
     out_list = []
@@ -86,19 +88,14 @@ def _parse_count_dict(count_dict: Dict['ecoalgorithm.SpeciesBase', int]):
     return out_list
 
 
-
 class IndividualPicker:
-    def __init__(self, ind_list: List['ecoalgorithm.SpeciesBase'], power: float = 2.0):
+    def __init__(self, ind_list: List['ecoalgorithm.SpeciesBase']):
         """
         Make a chooser class
 
         :param ind_list: the items to be potentially picked
         :type ind_list: list[SpeciesBase]
-        :param power: the power to which the picker decay function should be, use exp if not provided
-        :type power: float|None
         """
-        if type(power) is int:
-            power = float(power)
 
         for j in ind_list:
             assert j.is_mature
@@ -112,7 +109,8 @@ class IndividualPicker:
 
         self._wgt *= -1
 
-        self._wgt **= power
+        self._wgt = np.exp(self._wgt)
+
         self._wgt = self._wgt[:-1]
         self._wgt /= np.sum(self._wgt)
 
@@ -121,7 +119,7 @@ class IndividualPicker:
 
         self._returned_set = set()
 
-    def pick_female(self) -> 'SpeciesBase':
+    def pick_female(self) -> 'ecoalgorithm.SpeciesBase':
         """
         Make weighted selection
 
@@ -134,8 +132,7 @@ class IndividualPicker:
         self._returned_set.add(ind)
         return ind
 
-
-    def pick_male(self, female) -> 'SpeciesBase':
+    def pick_male(self, female) -> 'ecoalgorithm.SpeciesBase':
 
         assert len(self._ind_list) > 1
         assert type(female) is type(self._ind_list[0])
@@ -160,7 +157,7 @@ class IndividualPicker:
         return self.count_alive > 1
 
     @property
-    def best_individual(self) -> 'SpeciesBase':
+    def best_individual(self) -> 'ecoalgorithm.SpeciesBase':
         if self.count_alive > 0:
             return self._ind_list[0]
         else:
@@ -211,11 +208,6 @@ class IndividualPicker:
             summ[k] = ['{0}, {1}, {2}'.format(*s) for s in v]
 
         return json.dumps(summ, indent=4)
-
-
-
-
-
 
 
 # from . import _config
