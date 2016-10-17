@@ -14,7 +14,13 @@ def get_eco_inds_len(eco: Ecosystem) -> int:
     return len(get_eco_inds(eco))
 
 
+def build_example():
+    eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=50)
+    eco.run(3, ShowOutput.SHORT)
+
+
 class TestEcosystem(TestCase):
+
 
     def test_create_no_existing(self):
         # return
