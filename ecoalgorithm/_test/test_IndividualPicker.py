@@ -26,4 +26,6 @@ class TestIndividualPicker(TestCase):
             fem = picker.pick_female()
             picker.pick_male(fem)
 
+        print(picker.summary_str)
+
 

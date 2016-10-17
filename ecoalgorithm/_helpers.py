@@ -1,10 +1,12 @@
 import numpy as np
 from numpy.random import choice
 import ecoalgorithm
-from typing import List
+from typing import List, Dict
 from multiprocessing.dummy import Pool as ThreadPool
 from multiprocessing import cpu_count
 from enum import Enum
+from collections import defaultdict, OrderedDict
+import json
 
 
 class ShowOutput(Enum):
@@ -72,6 +74,18 @@ def mature_all(ind_list: List['ecoalgorithm.SpeciesBase'], multi_thread: bool = 
         for ind in ind_list:
             ind.mature()
 
+def _parse_count_dict(count_dict: Dict['ecoalgorithm.SpeciesBase', int]):
+
+    out_list = []
+
+    for k, v in count_dict.items():
+        out_list.append((k.class_name, k.success, v))
+
+    out_list.sort(key=lambda x: x[2], reverse=True)
+
+    return out_list
+
+
 
 class IndividualPicker:
     def __init__(self, ind_list: List['ecoalgorithm.SpeciesBase'], power: float = 2.0):
@@ -102,6 +116,11 @@ class IndividualPicker:
         self._wgt = self._wgt[:-1]
         self._wgt /= np.sum(self._wgt)
 
+        self._returned_females = defaultdict(int)
+        self._returned_males = defaultdict(int)
+
+        self._returned_set = set()
+
     def pick_female(self) -> 'SpeciesBase':
         """
         Make weighted selection
@@ -109,7 +128,12 @@ class IndividualPicker:
         :return: the selection
         :rtype: SpeciesBase
         """
-        return choice(self._ind_list, p=self._wgt)
+
+        ind = choice(self._ind_list, p=self._wgt)
+        self._returned_females[ind] += 1
+        self._returned_set.add(ind)
+        return ind
+
 
     def pick_male(self, female) -> 'SpeciesBase':
 
@@ -122,7 +146,10 @@ class IndividualPicker:
         no_female_weight = [self._wgt[i] for i in range(len(self._wgt)) if i != ix_female]
         no_female_weight /= np.sum(no_female_weight)
 
-        return choice(no_female, p=no_female_weight)
+        ind = choice(no_female, p=no_female_weight)
+        self._returned_males[ind] += 1
+        self._returned_set.add(ind)
+        return ind
 
     @property
     def num_alive(self):
@@ -150,6 +177,42 @@ class IndividualPicker:
     @property
     def count_all(self) -> int:
         return len(self._ind_list_all)
+
+    @property
+    def summary(self):
+
+        all_dict = defaultdict(int)
+
+        out_dict = OrderedDict()
+
+        for ind in self._returned_set:
+
+            if ind in self._returned_females:
+                all_dict[ind] += self._returned_females[ind]
+
+            if ind in self._returned_males:
+                all_dict[ind] += self._returned_males[ind]
+
+        out_dict['unique'] = len(self._returned_set)
+        out_dict['all'] = _parse_count_dict(all_dict)
+        out_dict['female'] = _parse_count_dict(self._returned_females)
+        out_dict['male'] = _parse_count_dict(self._returned_males)
+
+        return out_dict
+
+    @property
+    def summary_str(self):
+        summ = self.summary
+
+        for k, v in summ.items():
+            if k == 'unique':
+                continue
+
+            summ[k] = ['{0}, {1}, {2}'.format(*s) for s in v]
+
+        return json.dumps(summ, indent=4)
+
+
 
 
 
