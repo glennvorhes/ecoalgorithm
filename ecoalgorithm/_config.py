@@ -11,7 +11,7 @@ class EcoConfig:
         self._web_debug = True
         self._db_path = '/home/glenn/PycharmProjects/ecoalgorithm/results2.db'
         self._multithread = True
-        self._picker_weight = 2.0
+        self._picker_weight = 4.0
 
     @property
     def db_path(self):
@@ -112,12 +112,5 @@ class EcoConfig:
         assert isinstance(weight, float)
         assert weight >= 0
         self._picker_weight = weight
-
-
-
-
-
-
-
 
 config = EcoConfig()

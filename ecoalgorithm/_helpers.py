@@ -1,5 +1,4 @@
-import numpy as np
-from numpy.random import choice
+
 import ecoalgorithm
 from typing import List, Dict
 from multiprocessing.dummy import Pool as ThreadPool
@@ -11,9 +10,20 @@ import math
 from inspect import currentframe
 import os
 from ._config import config
+import random
+
+try:
+    import numpy as np
+    from numpy.random import choice
+    # TODO change this flag to true before production
+    use_np = False
+except ImportError:
+    np = None
+    choice = None
+    use_np = False
 
 
-def printd(msg: str):
+def printd(*args):
 
     enclosing_frame = currentframe().f_back
 
@@ -51,7 +61,7 @@ def printd(msg: str):
 
             pth = os.path.join(*pth_list)
 
-    print("{0}:{1} {2}".format(pth, line_num, msg))
+    print("{0}:{1}".format(pth, line_num), *args)
 
 
 class ShowOutput(Enum):
@@ -132,6 +142,34 @@ def _parse_count_dict(count_dict: Dict['ecoalgorithm.SpeciesBase', int]):
     return out_list
 
 
+def _make_weights(ind_count: int):
+    if use_np:
+        wgt = np.linspace(-1 * config.picker_weight, config.picker_weight, ind_count)
+        wgt = np.exp(wgt)
+        wgt /= sum(wgt)
+        return wgt
+
+    if ind_count == 0:
+        return []
+    elif ind_count == 1:
+        return [1]
+    else:
+        increment = 2 * config.picker_weight / (ind_count - 1)
+        out_wgt = [math.exp(-1 * config.picker_weight + increment * i) for i in range(ind_count)]
+        weight_sum = sum(out_wgt)
+        return [w / weight_sum for w in out_wgt]
+
+
+def _random_pick(some_list, probabilities):
+    x = random.uniform(0, 1)
+    cumulative_probability = 0.0
+    for item, item_probability in zip(some_list, probabilities):
+        cumulative_probability += item_probability
+        if x < cumulative_probability:
+            return item
+    raise Exception('should not get here')
+
+
 class IndividualPicker:
     def __init__(self, ind_list: List['ecoalgorithm.SpeciesBase']):
         """
@@ -152,9 +190,8 @@ class IndividualPicker:
             return
 
         self._ind_list.sort(key=lambda x: x.success)
-        self._wgt = np.linspace(-1 * config.picker_weight, config.picker_weight, len(self._ind_list))
-        self._wgt = np.exp(self._wgt)
-        self._wgt /= np.sum(self._wgt)
+
+        self._wgt = _make_weights(len(self._ind_list))
 
         self._returned_females = defaultdict(int)
         self._returned_males = defaultdict(int)
@@ -168,8 +205,10 @@ class IndividualPicker:
         :return: the selection
         :rtype: SpeciesBase
         """
-
-        ind = choice(self._ind_list, p=self._wgt)
+        if use_np:
+            ind = choice(self._ind_list, p=self._wgt)
+        else:
+            ind = _random_pick(self._ind_list, self._wgt)
         self._returned_females[ind] += 1
         self._returned_set.add(ind)
         return ind
@@ -182,10 +221,13 @@ class IndividualPicker:
         ix_female = self._ind_list.index(female)
 
         no_female = [self._ind_list[i] for i in range(len(self._ind_list)) if i != ix_female]
-        no_female_weight = [self._wgt[i] for i in range(len(self._wgt)) if i != ix_female]
-        no_female_weight /= np.sum(no_female_weight)
+        no_female_weight = _make_weights(len(no_female))
 
-        ind = choice(no_female, p=no_female_weight)
+        if use_np:
+            ind = choice(no_female, p=no_female_weight)
+        else:
+            ind = _random_pick(no_female, no_female_weight)
+
         self._returned_males[ind] += 1
         self._returned_set.add(ind)
         return ind

@@ -20,18 +20,20 @@ def initialize_sucess():
 
     eco.run(200, ecoalgorithm.ShowOutput.SHORT)
 
+
 class TestIndividualPicker(TestCase):
 
     def test_test(self):
-        # printd('here')
-        # initialize_sucess()
 
-        picker = IndividualPicker(get_some_cats())
+        # printd(ecoalgorithm.config.picker_weight)
+        initialize_sucess()
+
+        # picker = IndividualPicker(get_some_cats())
         #
-        for i in range(30):
-            fem = picker.pick_female()
-            picker.pick_male(fem)
-
-        print(picker.summary_str)
+        # for i in range(30):
+        #     fem = picker.pick_female()
+        #     picker.pick_male(fem)
+        #
+        # print(picker.summary_str)
 
 
