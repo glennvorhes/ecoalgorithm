@@ -110,7 +110,7 @@ class EcoConfig:
         if isinstance(weight, int):
             weight = float(weight)
         assert isinstance(weight, float)
-        assert weight >= 0
+        assert 0 <= weight <= 100
         self._picker_weight = weight
 
 config = EcoConfig()

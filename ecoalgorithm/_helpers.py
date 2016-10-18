@@ -1,4 +1,3 @@
-
 import ecoalgorithm
 from typing import List, Dict
 from multiprocessing.dummy import Pool as ThreadPool
@@ -11,10 +10,12 @@ from inspect import currentframe
 import os
 from ._config import config
 import random
+import multiprocessing
 
 try:
     import numpy as np
     from numpy.random import choice
+
     # TODO change this flag to true before production
     use_np = False
 except ImportError:
@@ -24,7 +25,6 @@ except ImportError:
 
 
 def printd(*args):
-
     enclosing_frame = currentframe().f_back
 
     """
@@ -113,25 +113,54 @@ def breed(
 
 
 def _mature_individual(ind: 'ecoalgorithm.SpeciesBase'):
+
     if not ind.is_mature:
         ind.mature()
+        return tuple([ind.guid, ind.success])
+    else:
+        return None
 
 
 def mature_all(ind_list: List['ecoalgorithm.SpeciesBase']):
-    # TODO compare performance with single thread
+
+    if len([ind for ind in ind_list if not ind.is_mature]) == 0:
+        return
 
     if config.multithread:
-        pool = ThreadPool(cpu_count())
-        pool.map(_mature_individual, ind_list)
+
+        guid_success_pairs = []
+        """
+        List[Tuple[str, float or None]]
+        """
+
+        def mature_callback(res):
+            if res is not None:
+                guid_success_pairs.append(res)
+
+        def err_callback(ex):
+            print(ex)
+
+        pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+
+        # pool.map_async(_mature_individual, ind_list, callback=mature_callback, error_callback=err_callback)
+        for ind in ind_list:
+            pool.apply_async(_mature_individual, args=(ind,), callback=mature_callback, error_callback=err_callback)
+
         pool.close()
         pool.join()
+
+        if len(guid_success_pairs) > 0:
+            ind_lookup = {ind.guid: ind for ind in ind_list}
+
+            for pr in guid_success_pairs:
+                ind_lookup[pr[0]].success = pr[1]
+
     else:
         for ind in ind_list:
             _mature_individual(ind)
 
 
 def _parse_count_dict(count_dict: Dict['ecoalgorithm.SpeciesBase', int]):
-
     out_list = []
 
     for k, v in count_dict.items():
@@ -292,7 +321,6 @@ class IndividualPicker:
             summ[k] = ['{0}, {1}, {2}'.format(*s) for s in v]
 
         return json.dumps(summ, indent=4)
-
 
 # from . import _config
 #
