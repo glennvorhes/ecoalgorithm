@@ -10,6 +10,7 @@ import json
 import math
 from inspect import currentframe
 import os
+from ._config import config
 
 
 def printd(msg: str):
@@ -151,51 +152,9 @@ class IndividualPicker:
             return
 
         self._ind_list.sort(key=lambda x: x.success)
-        self._wgt = np.linspace(0, 1, len(self._ind_list))
-
-
-
-
-        # wgt_5 =
-
+        self._wgt = np.linspace(-1 * config.picker_weight, config.picker_weight, len(self._ind_list))
         self._wgt = np.exp(self._wgt)
-        # self._wgt *= 10
-        # print(self._wgt)
-
         self._wgt /= np.sum(self._wgt)
-
-        _min = self._ind_list[-1].success
-        _max = self._ind_list[0].success
-
-        self._wgt_2 = [i.success - self._ind_list[-1].success + 0.1 for i in self._ind_list]
-        self._wgt_3 = [(i.success - _min)/ (_max - _min) for i in self._ind_list]
-        self._wgt_3 = np.exp(self._wgt_3)
-        self._wgt_3 /= np.sum(self._wgt_3)
-
-
-        # print(self._wgt_3)
-
-        self._wgt_2 = np.array(self._wgt_2)
-        self._wgt_2 = np.log(self._wgt_2)
-
-
-
-        # self._wgt_2 /= np.sum(self._wgt_2)
-        # self._wgt_2 *= 10
-        self._wgt_2 = np.exp(self._wgt_2)
-        self._wgt_2 /= np.sum(self._wgt_2)
-
-        # print(self._wgt_2)
-
-        # self._wgt = self._wgt_3
-
-
-        # self._wgt_2 = np.log(self._wgt_2)
-        # self._wgt_2 /= np.sum(self._wgt_2)
-
-
-        # self._wgt = self._wgt_2
-
 
         self._returned_females = defaultdict(int)
         self._returned_males = defaultdict(int)

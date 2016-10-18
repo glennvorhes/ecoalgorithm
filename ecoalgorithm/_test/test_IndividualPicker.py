@@ -23,16 +23,15 @@ def initialize_sucess():
 class TestIndividualPicker(TestCase):
 
     def test_test(self):
-        pass
         # printd('here')
         # initialize_sucess()
 
-        # picker = IndividualPicker(get_some_cats())
+        picker = IndividualPicker(get_some_cats())
         #
-        # for i in range(30):
-        #     fem = picker.pick_female()
-        #     picker.pick_male(fem)
-        #
-        # print(picker.summary_str)
+        for i in range(30):
+            fem = picker.pick_female()
+            picker.pick_male(fem)
+
+        print(picker.summary_str)
 
 

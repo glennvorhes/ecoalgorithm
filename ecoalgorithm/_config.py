@@ -10,6 +10,8 @@ class EcoConfig:
         self._web_port = 5001
         self._web_debug = True
         self._db_path = '/home/glenn/PycharmProjects/ecoalgorithm/results2.db'
+        self._multithread = True
+        self._picker_weight = 2.0
 
     @property
     def db_path(self):
@@ -89,5 +91,33 @@ class EcoConfig:
         :type debug: bool
         """
         self._web_debug = debug
+
+    @property
+    def multithread(self):
+        return self._multithread
+
+    @multithread.setter
+    def multithread(self, multi):
+        assert isinstance(multi, bool)
+        self._multithread = multi
+
+    @property
+    def picker_weight(self):
+        return self._picker_weight
+
+    @picker_weight.setter
+    def picker_weight(self, weight):
+        if isinstance(weight, int):
+            weight = float(weight)
+        assert isinstance(weight, float)
+        assert weight >= 0
+        self._picker_weight = weight
+
+
+
+
+
+
+
 
 config = EcoConfig()
