@@ -1,6 +1,7 @@
-from ecoalgorithm.db_connect import db
+from ecoalgorithm import db
 from .. import Ecosystem, SpeciesBase
-from .example_species import Cat, Dog, Fish, DeadFish, Snake, Racoon, get_some_inds, get_species_set, get_some_inds_len, ExampleSpecies
+from .example_species import Cat, Dog, Fish, DeadFish, Snake, Racoon, \
+    get_some_inds, get_species_set, get_some_inds_len, ExampleSpecies
 from unittest import TestCase
 from typing import List
 from .. import ShowOutput

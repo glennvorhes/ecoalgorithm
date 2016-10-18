@@ -38,8 +38,8 @@ class EcoConfig:
         except AssertionError:
             raise AssertionError("The new db file has an invalid directory or does not end with .db")
 
-        if self._db_path is not None and os.path.isfile(self._db_path):
-            os.remove(self.db_path)
+        # if self._db_path is not None and os.path.isfile(self._db_path):
+        #     os.remove(self.db_path)
 
         self._db_path = db
 

@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for, render_template
-from ecoalgorithm.db_connect import db
+from ecoalgorithm._db_connect import db
 from ecoalgorithm import _models as models
 from ._config import config
 import sqlalchemy

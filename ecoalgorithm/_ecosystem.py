@@ -1,4 +1,4 @@
-from .db_connect import db
+from ._db_connect import db
 from ._config import config
 from typing import Dict, List, Set
 from ._models import Generation, SpeciesBase

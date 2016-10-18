@@ -1,4 +1,4 @@
-from ecoalgorithm.db_connect import db
+from ecoalgorithm import db
 from .. import Ecosystem, SpeciesBase
 from .._models import Generation
 from .example_species import Cat, Dog, Fish, DeadFish, get_some_inds, get_species_set

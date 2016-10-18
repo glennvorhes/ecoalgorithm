@@ -2,7 +2,7 @@ import sqlalchemy
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from ecoalgorithm.db_connect import db
+from ecoalgorithm._db_connect import db
 import json
 from uuid import uuid4
 from collections import OrderedDict
@@ -11,7 +11,6 @@ from typing import List, Dict, Set
 
 from . import _helpers
 
-__all__ = ['create_db', 'DbGeneration', 'SpeciesBase']
 
 Base = declarative_base()
 
@@ -557,6 +556,9 @@ class Generation(Base):
 def create_db():
     Base.metadata.drop_all(bind=db.engine)
     Base.metadata.create_all(bind=db.engine)
+
+__all__ = [create_db, Generation, SpeciesBase]
+
 
 
 if __name__ == '__main__':

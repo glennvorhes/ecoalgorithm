@@ -1,7 +1,6 @@
 from .example_species import ExampleSpecies
-from ecoalgorithm import SpeciesBase
 from unittest import TestCase
-from ecoalgorithm.db_connect import db
+from ecoalgorithm import db, SpeciesBase
 from .. import _helpers
 
 
