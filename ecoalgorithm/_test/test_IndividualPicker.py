@@ -1,7 +1,7 @@
 from .example_species import get_some_inds, Cat, get_species_set
 from unittest import TestCase
 import ecoalgorithm
-from .._helpers import IndividualPicker, mature_all
+from .._helpers import IndividualPicker, mature_all, printd
 
 
 def get_some_cats():
@@ -23,7 +23,9 @@ def initialize_sucess():
 class TestIndividualPicker(TestCase):
 
     def test_test(self):
-        initialize_sucess()
+        pass
+        # printd('here')
+        # initialize_sucess()
 
         # picker = IndividualPicker(get_some_cats())
         #

@@ -8,6 +8,49 @@ from enum import Enum
 from collections import defaultdict, OrderedDict
 import json
 import math
+from inspect import currentframe
+import os
+
+
+def printd(msg: str):
+
+    enclosing_frame = currentframe().f_back
+
+    """
+    Line number get found at
+    http://code.activestate.com/recipes/145297-grabbing-the-current-line-number-easily/
+    """
+    line_num = enclosing_frame.f_lineno
+
+    working_path = os.getcwd()
+
+    file_dir = os.path.dirname(enclosing_frame.f_code.co_filename)
+    file_name = os.path.basename(enclosing_frame.f_code.co_filename)
+
+    common_prefix = os.path.commonprefix([working_path, file_dir])
+
+    pth = os.path.join(file_dir, file_name)
+
+    if len(common_prefix) > 0:
+        working_path = working_path.replace(common_prefix, '')
+        file_path = file_dir.replace(common_prefix, '')
+
+        path_parts = working_path.split(os.sep)
+        file_parts = file_path.split(os.sep)
+
+        if len(file_parts) >= len(path_parts):
+            file_parts.append(file_name)
+            pth = os.path.join(*file_parts)
+        else:
+            pth_list = []
+            for i in range(len(path_parts) - len(file_parts)):
+                pth_list.append(os.pardir)
+
+            pth_list.append(file_name)
+
+            pth = os.path.join(*pth_list)
+
+    print("{0}:{1} {2}".format(pth, line_num, msg))
 
 
 class ShowOutput(Enum):
@@ -104,15 +147,55 @@ class IndividualPicker:
 
         self._ind_list = [i for i in ind_list if i.is_alive]
 
-        self._ind_list.sort(key=lambda x: x.success, reverse=True)
-        self._wgt = np.linspace(-1, 0, len(self._ind_list) + 1)
+        if len(self._ind_list) == 0:
+            return
 
-        self._wgt *= -1
+        self._ind_list.sort(key=lambda x: x.success)
+        self._wgt = np.linspace(0, 1, len(self._ind_list))
+
+
+
+
+        # wgt_5 =
 
         self._wgt = np.exp(self._wgt)
+        # self._wgt *= 10
+        # print(self._wgt)
 
-        self._wgt = self._wgt[:-1]
         self._wgt /= np.sum(self._wgt)
+
+        _min = self._ind_list[-1].success
+        _max = self._ind_list[0].success
+
+        self._wgt_2 = [i.success - self._ind_list[-1].success + 0.1 for i in self._ind_list]
+        self._wgt_3 = [(i.success - _min)/ (_max - _min) for i in self._ind_list]
+        self._wgt_3 = np.exp(self._wgt_3)
+        self._wgt_3 /= np.sum(self._wgt_3)
+
+
+        # print(self._wgt_3)
+
+        self._wgt_2 = np.array(self._wgt_2)
+        self._wgt_2 = np.log(self._wgt_2)
+
+
+
+        # self._wgt_2 /= np.sum(self._wgt_2)
+        # self._wgt_2 *= 10
+        self._wgt_2 = np.exp(self._wgt_2)
+        self._wgt_2 /= np.sum(self._wgt_2)
+
+        # print(self._wgt_2)
+
+        # self._wgt = self._wgt_3
+
+
+        # self._wgt_2 = np.log(self._wgt_2)
+        # self._wgt_2 /= np.sum(self._wgt_2)
+
+
+        # self._wgt = self._wgt_2
+
 
         self._returned_females = defaultdict(int)
         self._returned_males = defaultdict(int)
@@ -159,7 +242,7 @@ class IndividualPicker:
     @property
     def best_individual(self) -> 'ecoalgorithm.SpeciesBase':
         if self.count_alive > 0:
-            return self._ind_list[0]
+            return self._ind_list[-1]
         else:
             return None
 
