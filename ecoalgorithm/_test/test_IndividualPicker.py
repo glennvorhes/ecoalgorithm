@@ -1,6 +1,6 @@
+import ecoalgorithm
 from .example_species import get_some_inds, Cat, get_species_set
 from unittest import TestCase
-import ecoalgorithm
 from .._helpers import IndividualPicker, mature_all, printd
 
 
@@ -35,5 +35,3 @@ class TestIndividualPicker(TestCase):
         #     picker.pick_male(fem)
         #
         # print(picker.summary_str)
-
-

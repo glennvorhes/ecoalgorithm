@@ -1,6 +1,8 @@
 from random import random
 from ecoalgorithm import SpeciesBase
 
+from time import sleep
+
 
 _random_change = 2
 
@@ -13,6 +15,14 @@ class ExampleSpecies(SpeciesBase):
         super().__init__()
 
     def mature(self):
+        # dummy processing
+        #
+        # dummy = 0
+        # for i in range(1000000):
+        #     dummy += 0.1
+
+        # sleep(0.1)
+
         self.success = -1 * (self.x - 15) ** 2 + -1 * (self.y + 4) ** 2 + 25
 
     def mutate(self):

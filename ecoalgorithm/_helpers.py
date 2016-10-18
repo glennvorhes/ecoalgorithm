@@ -112,7 +112,7 @@ def breed(
     return out_list
 
 
-def mature_individual(ind: 'ecoalgorithm.SpeciesBase'):
+def _mature_individual(ind: 'ecoalgorithm.SpeciesBase'):
     if not ind.is_mature:
         ind.mature()
 
@@ -122,12 +122,12 @@ def mature_all(ind_list: List['ecoalgorithm.SpeciesBase']):
 
     if config.multithread:
         pool = ThreadPool(cpu_count())
-        pool.map(mature_individual, ind_list)
+        pool.map(_mature_individual, ind_list)
         pool.close()
         pool.join()
     else:
         for ind in ind_list:
-            ind.mature()
+            _mature_individual(ind)
 
 
 def _parse_count_dict(count_dict: Dict['ecoalgorithm.SpeciesBase', int]):
