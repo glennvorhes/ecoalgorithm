@@ -5,6 +5,7 @@ from ._models import Generation, SpeciesBase
 from warnings import warn
 from ._helpers import ShowOutput
 from . import config
+from datetime import datetime
 
 __author__ = 'glenn'
 
@@ -141,6 +142,8 @@ class Ecosystem(object):
         # start the loop
         while True:
 
+            start_time = datetime.now()
+
             if type(generation_limit) is int:
                 generation_counter += 1
 
@@ -185,6 +188,9 @@ class Ecosystem(object):
                     last_gen_success = this_gen_sucess
 
             self._working_generation = self._working_generation.next_generation
+
+            if show_output in (ShowOutput.SHORT, ShowOutput.LONG):
+                print('\tProcessing Time: {0}'.format(datetime.now() - start_time))
 
     @property
     def working_generation(self) -> Generation:
