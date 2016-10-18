@@ -354,7 +354,7 @@ class Generation(Base):
         last = db.sess.query(cls.gen_num).order_by(sqlalchemy.desc(cls.gen_num)).first()
         return None if last is None else last[0]
 
-    def __init__(self, species_set: Set[SpeciesBase.__class__], multithread: bool):
+    def __init__(self, species_set: Set[SpeciesBase.__class__]):
         """
         create a new generation
 
@@ -364,8 +364,6 @@ class Generation(Base):
         """
         :type: Generation
         """
-
-        self._multithread = multithread
 
         if self.uid is None:
             self.gen_time = self.mod_time = datetime.utcnow()
@@ -381,7 +379,6 @@ class Generation(Base):
         """
         :type: dict[str, SpeciesBase.__class__]
         """
-
 
         for c in self._species_set:
             if c.__name__ == SpeciesBase.__name__:
@@ -417,9 +414,9 @@ class Generation(Base):
 
             self._species_set.add(ind.__class__)
 
-        _helpers.mature_all(new_individuals, self._multithread)
+        _helpers.mature_all(new_individuals)
 
-        self.__init__(self._species_set, self._multithread)
+        self.__init__(self._species_set)
 
         return self._species_set
 
@@ -470,7 +467,7 @@ class Generation(Base):
         if len(self.individuals) == 0:
             raise AssertionError('there must at least one individual in the generation')
 
-        _helpers.mature_all(self.individuals, self._multithread)
+        _helpers.mature_all(self.individuals)
 
         if self.uid is None:
             db.sess.add(self)
@@ -548,9 +545,9 @@ class Generation(Base):
             if len(self._next_gen_individuals) == 0:
                 raise AssertionError('Next generation not yet populated')
 
-            _helpers.mature_all(self._next_gen_individuals, self._multithread)
+            _helpers.mature_all(self._next_gen_individuals)
 
-            self._next_generation = Generation(self._species_set, self._multithread)
+            self._next_generation = Generation(self._species_set)
             self._next_generation.add_individuals(self._next_gen_individuals)
             self._next_generation.save()
 

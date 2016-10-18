@@ -107,10 +107,10 @@ def mature_individual(ind: 'ecoalgorithm.SpeciesBase'):
         ind.mature()
 
 
-def mature_all(ind_list: List['ecoalgorithm.SpeciesBase'], multi_thread: bool = True):
+def mature_all(ind_list: List['ecoalgorithm.SpeciesBase']):
     # TODO compare performance with single thread
 
-    if multi_thread:
+    if config.multithread:
         pool = ThreadPool(cpu_count())
         pool.map(mature_individual, ind_list)
         pool.close()

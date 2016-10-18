@@ -4,6 +4,7 @@ from typing import Dict, List, Set
 from ._models import Generation, SpeciesBase
 from warnings import warn
 from ._helpers import ShowOutput
+from . import config
 
 __author__ = 'glenn'
 
@@ -18,8 +19,7 @@ class Ecosystem(object):
                  new_individuals: List[SpeciesBase] = list(),
                  use_existing: bool = True,
                  max_population: int = 100,
-                 keep_all: bool = True,
-                 multithread: bool = True
+                 keep_all: bool = True
                  ):
         """
         initialize the population
@@ -55,8 +55,6 @@ class Ecosystem(object):
 
         assert type(keep_all) is bool
 
-        assert type(multithread) is bool
-
         self._max_population = max_population
         self._keep_all = keep_all
 
@@ -88,21 +86,19 @@ class Ecosystem(object):
                 if len(new_individuals) == 2:
                     raise AssertionError('Not enough individuals to start')
 
-                self._working_generation = Generation(
-                    species_set, multithread
-                )
+                self._working_generation = Generation(species_set)
             else:
                 self._working_generation = db.sess.query(Generation).filter(
                     Generation.gen_num == gen_num
                 ).first()
 
-                self._working_generation.__init__(species_set, multithread)
+                self._working_generation.__init__(species_set)
 
         else:
             db.clear_db()
             if len(new_individuals) == 0:
                 raise AssertionError('Not enough individuals to start')
-            self._working_generation = Generation(species_set, multithread)
+            self._working_generation = Generation(species_set)
 
         if new_individuals:
             self._working_generation.add_individuals(new_individuals)
