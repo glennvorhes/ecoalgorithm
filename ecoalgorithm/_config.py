@@ -9,7 +9,7 @@ class EcoConfig:
         self._stop_threshold_generations = 5
         self._web_port = 5001
         self._web_debug = True
-        self._db_path = '/home/glenn/PycharmProjects/ecoalgorithm/results2.db'
+        self._db_path = os.path.join(os.getcwd(), 'results.db')
         self._multithread = True
         self._picker_weight = 4.0
 
