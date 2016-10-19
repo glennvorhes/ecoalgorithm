@@ -26,8 +26,8 @@ class SpeciesBase(Base):
     )
     _class_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     _success = sqlalchemy.Column(sqlalchemy.Float)
-    _parent1_id = sqlalchemy.Column(sqlalchemy.String(36))
-    _parent2_id = sqlalchemy.Column(sqlalchemy.String(36))
+    _parent1_id = sqlalchemy.Column(sqlalchemy.String(36), index=True)
+    _parent2_id = sqlalchemy.Column(sqlalchemy.String(36), index=True)
     _kwargs = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     _alive = sqlalchemy.Column(sqlalchemy.String(1), nullable=False, default='T')
 
@@ -148,11 +148,9 @@ class SpeciesBase(Base):
             self._kwargs = json.dumps(self.params)
             self._success = None
             self._alive = 'T'
-
             self._success_set = False
         else:
             self._set_attributes(**json.loads(self._kwargs))
-
             self._success_set = True
 
     def update_params(self):
