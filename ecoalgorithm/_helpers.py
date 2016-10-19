@@ -105,8 +105,8 @@ def breed(
 
     while len(out_list) < offspring_count:
         new_ind = male.mate(female)
-        new_ind._parent1_id = female.guid
-        new_ind._parent2_id = male.guid
+        new_ind._mother_id = female.guid
+        new_ind._father_id = male.guid
         out_list.append(new_ind)
 
     return out_list
