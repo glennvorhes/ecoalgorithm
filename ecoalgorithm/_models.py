@@ -26,8 +26,8 @@ class SpeciesBase(Base):
     )
     _class_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     _success = sqlalchemy.Column(sqlalchemy.Float)
-    _parent1_id = sqlalchemy.Column(sqlalchemy.String(36), index=True)
-    _parent2_id = sqlalchemy.Column(sqlalchemy.String(36), index=True)
+    _mother_id = sqlalchemy.Column(sqlalchemy.String(36), index=True)
+    _father_id = sqlalchemy.Column(sqlalchemy.String(36), index=True)
     _kwargs = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     _alive = sqlalchemy.Column(sqlalchemy.String(1), nullable=False, default='T')
 
@@ -143,8 +143,8 @@ class SpeciesBase(Base):
             self._guid = str(uuid4())
             self._gen_num = None
             self._class_name = self.__class__.__name__
-            self._parent1_id = None
-            self._parent2_id = None
+            self._mother_id = None
+            self._father_id = None
             self._kwargs = json.dumps(self.params)
             self._success = None
             self._alive = 'T'
@@ -205,7 +205,7 @@ class SpeciesBase(Base):
         return self._guid
 
     @property
-    def params(self) -> dict:
+    def params(self) -> Dict[str, object]:
         """
         Get the object parameters represented as a dictionary
 
@@ -305,22 +305,22 @@ class SpeciesBase(Base):
         return ind
 
     @property
-    def parent1(self) -> 'SpeciesBase':
+    def mother(self) -> 'SpeciesBase' or None:
         """
 
         :return:
         :rtype: SpeciesBase
         """
-        return self.get_by_guid(self._parent1_id)
+        return SpeciesBase.get_by_guid(self._mother_id)
 
     @property
-    def parent2(self) -> 'SpeciesBase':
+    def father(self) -> 'SpeciesBase' or None:
         """
 
         :return:
         :rtype: SpeciesBase
         """
-        return self.get_by_guid(self._parent2_id)
+        return SpeciesBase.get_by_guid(self._father_id)
 
     @property
     def is_in_db(self):
