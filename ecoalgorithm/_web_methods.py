@@ -141,6 +141,11 @@ class _GenerationSummary:
     def best_inds(self) -> List[_IndividualInfo]:
         return self._best_inds
 
+class _AllSummary:
+
+    def __init__(self):
+        pass
+
 
 def individual_summary(guid: str) -> _IndividualSummary or None:
     ind = SpeciesBase.get_by_guid(guid)
@@ -157,6 +162,11 @@ def generation_summary(gen_num: int) -> _GenerationSummary or None:
         return None
     else:
         return _GenerationSummary(gen_num)
+
+
+def all_summary() -> _AllSummary:
+
+    return _AllSummary()
 
 
 __all__ = [individual_summary, generation_summary]

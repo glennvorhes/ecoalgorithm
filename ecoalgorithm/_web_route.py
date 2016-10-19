@@ -12,6 +12,8 @@ app = Flask(__name__)
 @app.route('/')
 @app.route('/summary')
 def summary():
+
+    all_summ = web.all_summary()
     out_str = 'fish'
     return out_str
     # generations = db.sess.query(models.Generation).order_by(sqlalchemy.desc(models.Generation.gen_num))
