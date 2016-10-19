@@ -1,0 +1,94 @@
+{% extends "_layout.html" %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='individual.css') }}">
+{% endblock head %}
+
+{% block body %}
+    <h1>Individual</h1>
+    {% if summ %}
+        {% if summ.mother and summ.father %}
+            <div class="parents">
+                <div>
+                    <a href="{{ url_for('individual', guid=summ.mother.guid) }}">
+                        Mother Success: {{ summ.mother.success }} ({{ summ.mother.child_count }})
+                    </a>
+                </div>
+                <div>
+                    <a href="{{ url_for('individual', guid=summ.father.guid) }}">
+                        Father Success: {{ summ.father.success }} ({{ summ.father.child_count }})
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        <div>
+            <a href="{{ url_for('generation', gen_num=summ.gen_num) }}">
+                <h3>Generation {{ summ.gen_num }}</h3>
+            </a>
+        </div>
+        <div class="ind-info">
+            <div>
+                <h4>Species: {{ summ.class_name }}</h4>
+                <h4>Sucess: {{ summ.success }}</h4>
+                <ul>
+                    {% for p in summ.params %}
+                        <li>{{ p[0] }}: {{ p[1] }}</li>
+                    {% endfor %}
+
+                </ul>
+            </div>
+            <div>
+                <h4>Siblings</h4>
+                <ul>
+                    {% for sib in summ.siblings %}
+                        <li>
+                            <a href="{{ url_for('individual', guid=sib.guid) }}">
+                                Success: {{ sib.success }} ({{ sib.child_count }})
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div>
+            <div>
+                Children
+            </div>
+            {% if summ.children|length > 0 %}
+                <div class="children">
+                    <div>
+                        <ul>
+                            {% for i in range(((summ.children|length + 1)/ 2 )| int) %}
+                                <li>
+                                    <a href="{{ url_for('individual', guid=summ.children[i].guid) }}">
+                                        Success: {{ summ.children[i].success }} ({{ summ.children[i].child_count }})
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            {% for i in range(((summ.children|length + 1) / 2 )| int, summ.children|length) %}
+                                <li>
+                                    <a href="{{ url_for('individual', guid=summ.children[i].guid) }}">
+                                        Success: {{ summ.children[i].success }} ({{ summ.children[i].child_count }})
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                    </div>
+                </div>
+            {% else %}
+                <div>
+                    <h4>No Children</h4>
+                </div>
+
+            {% endif %}
+        </div>
+    {% else %}
+        <div>
+            <h4 class="no-info">Individual with this identifier not found</h4>
+        </div>
+    {% endif %}
+{% endblock body %}

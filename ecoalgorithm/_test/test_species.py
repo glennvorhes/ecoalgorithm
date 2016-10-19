@@ -159,9 +159,9 @@ class SpeciesTest(TestCase):
         db.sess.add_all(out_list)
         db.sess.commit()
 
-        self.assertEquals(x, out_list[0].parent1.x)
-        self.assertEquals(y, out_list[0].parent2.y)
+        self.assertEquals(x, out_list[0].mother.x)
+        self.assertEquals(y, out_list[0].father.y)
 
-        out_list[0]._parent1_id = None
+        out_list[0]._mother_id = None
 
-        self.assertIsNone(out_list[0].parent1)
+        self.assertIsNone(out_list[0].mother)

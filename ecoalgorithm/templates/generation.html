@@ -1,6 +1,52 @@
 {% extends "_layout.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='generation.css') }}">
+{% endblock head %}
+
 {% block body %}
-  <h1>Overview</h1>
-  <p>generation</p>
-    {{ content }}
-{% endblock %}
+    {% if summ %}
+        <h1>Generation {{ summ.gen_num }}</h1>
+        <h3>Best Individuals</h3>
+        <ul>
+            {% for b in summ.best_inds %}
+                <li>
+                    <a href="{{ url_for('individual', guid=b.guid) }}">
+                        {{ b.class_name }} Success: {{ b.success }} ({{ b.child_count }})
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="members">
+            <div>
+                <ul>
+                    {% for i in range(((summ.members|length + 1)/ 2 )| int) %}
+                        <li>
+                            <a href="{{ url_for('individual', guid=summ.members[i].guid) }}">
+                                {{ summ.members[i].class_name }} Success: {{ summ.members[i].success }}
+                                ({{ summ.members[i].child_count }})
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <ul>
+                    {% for i in range(((summ.members|length + 1) / 2 )| int, summ.members|length) %}
+                        <li>
+                            <a href="{{ url_for('individual', guid=summ.members[i].guid) }}">
+                                {{ summ.members[i].class_name }} Success: {{ summ.members[i].success }}
+                                ({{ summ.members[i].child_count }})
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% else %}
+        <h1>Generation</h1>
+        <div>
+            <h4 class="no-info">Individual with this identifier not found</h4>
+        </div>
+    {% endif %}
+{% endblock body %}

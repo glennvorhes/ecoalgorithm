@@ -1,9 +1,8 @@
+import ecoalgorithm
 from ecoalgorithm import start_web_server
-from ecoalgorithm._test.test_ecosystem import build_example
+import os
 
-rebuild_example = True
+ecoalgorithm.config.db_path = os.path.join(
+    os.getcwd(), 'ecoalgorithm', '_test', 'results.db_123')
 
-if rebuild_example:
-    build_example()
-
-# start_web_server(5002, True)
+start_web_server(5002, True)

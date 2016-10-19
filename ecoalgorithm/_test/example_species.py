@@ -12,6 +12,7 @@ class ExampleSpecies(SpeciesBase):
         self.x = x if type(x) is float else (random() - 0.5) * 200
         self.y = y if type(y) is float else (random() - 0.5) * 200
         self.blue = blue if type(blue) is bool else True if random() > 0.5 else False
+        self.null_val = None
         super().__init__()
 
     def mature(self):

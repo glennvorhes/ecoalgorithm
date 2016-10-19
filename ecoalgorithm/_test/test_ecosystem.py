@@ -1,4 +1,4 @@
-from ecoalgorithm import db
+from ecoalgorithm import db, config
 from .. import Ecosystem, SpeciesBase
 from .example_species import Cat, Dog, Fish, DeadFish, Snake, Racoon, \
     get_some_inds, get_species_set, get_some_inds_len, ExampleSpecies
@@ -16,12 +16,13 @@ def get_eco_inds_len(eco: Ecosystem) -> int:
 
 
 def build_example():
+    db.clear_db()
+    config.multithread = False
     eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
     eco.run(100, ShowOutput.SHORT)
 
 
 class TestEcosystem(TestCase):
-
 
     def test_create_no_existing(self):
         eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
