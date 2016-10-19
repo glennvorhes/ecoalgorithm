@@ -13,7 +13,6 @@ app = Flask(__name__)
 @app.route('/summary')
 def summary():
     out_str = 'fish'
-    print(web.something)
     return out_str
     # generations = db.sess.query(models.Generation).order_by(sqlalchemy.desc(models.Generation.gen_num))
     # """

@@ -8,14 +8,6 @@ from typing import List, Tuple
 import sqlalchemy
 
 
-# SpeciesBase = ecoalgorithm.SpeciesBase
-
-
-def something():
-    # print(ecoalgorithm.db)
-    pass
-
-
 def _get_children_count(guid):
     return db.sess.query(SpeciesBase).filter(
         sqlalchemy.or_(
@@ -125,7 +117,6 @@ class _GenerationSummary:
 
         self._members = [_IndividualInfo(*m) for m in mems]
 
-
         max_vals = db.sess.query(
             SpeciesBase._guid,
             sqlalchemy.func.max(SpeciesBase._success),
@@ -168,4 +159,4 @@ def generation_summary(gen_num: int) -> _GenerationSummary or None:
         return _GenerationSummary(gen_num)
 
 
-__all__ = [individual_summary]
+__all__ = [individual_summary, generation_summary]
