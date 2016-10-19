@@ -34,7 +34,7 @@ class EcoConfig:
         db = db.strip()
         try:
             assert os.path.isdir(os.path.dirname(db))
-            assert db.endswith('.db')
+            assert db.endswith('.db') or db.endswith('.db_123')
         except AssertionError:
             raise AssertionError("The new db file has an invalid directory or does not end with .db")
 
