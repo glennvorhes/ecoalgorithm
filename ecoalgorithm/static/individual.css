@@ -1,0 +1,6 @@
+.parents > div {
+  margin: 10px;
+  border: solid gray 1px;
+  padding: 10px;
+  background-color: lightblue;
+}

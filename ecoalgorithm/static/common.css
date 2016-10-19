@@ -1,0 +1,26 @@
+html,
+body {
+  width: 100%;
+}
+body {
+  background-color: lightgrey;
+  margin: 10px 5%;
+}
+body > div {
+  width: 90%;
+}
+.parents,
+.ind-info,
+.children,
+.members {
+  display: flex;
+}
+.parents > div,
+.ind-info > div,
+.children > div,
+.members > div {
+  flex: 1;
+}
+.no-info {
+  color: red;
+}
