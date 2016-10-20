@@ -1,10 +1,10 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='ecoalgorithm',
     version='',
     packages=['ecoalgorithm'],
-    package_data={'ecoalgorithm': ['static/*.js', 'static/*.map', 'static/*.css', 'templates/*.html']},
+    package_data={'ecoalgorithm': ['static/*.js', 'static/*.map', 'static/*.css', 'templates/*.html', '_test/*.*']},
     url='https://github.com/glennvorhes/ecoalgorithm',
     license='MIT',
     author='Glenn Vorhes',
