@@ -1,8 +1,6 @@
 /// <reference path="../_types/c3/c3.d.ts"/>
-
-import c3 = require('c3')
-
-
+"use strict";
+var c3 = require('c3');
 // var chart = c3.generate({
 //     data: {
 //         json: {
@@ -12,10 +10,7 @@ import c3 = require('c3')
 //         }
 //     }
 // });
-
-
 function makeChart() {
-
     var chart = c3.generate({
         bindto: '#chart',
         data: {
@@ -27,7 +22,6 @@ function makeChart() {
             }
         }
     });
-
     //
     // setTimeout(function () {
     //     chart.load({
@@ -50,8 +44,5 @@ function makeChart() {
     //         ids: 'data2'
     //     });
     // }, 2000);
-
 }
-
 window['makeChart'] = makeChart;
-

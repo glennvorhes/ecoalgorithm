@@ -6,9 +6,9 @@ const path = require('path');
 
 module.exports = {
     watch: true,
-    entry: path.join(__dirname, 'js', 'results.js'),
+    entry: path.join(__dirname, 'ts_js', 'summary.js'),
     output: {
-        filename: 'results.js',
+        filename: 'summary.js',
         path: path.join(__dirname, 'ecoalgorithm', 'static')
     },
     externals: {

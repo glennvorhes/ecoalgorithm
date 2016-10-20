@@ -1,16 +1,23 @@
 {% extends "_layout.html" %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='summary.css') }}">
+{% endblock head %}
+
 {% block body %}
     <h1>Overview</h1>
     <p>summary</p>
-    {% if generations %}
-        <table>
-        {% for gen in generations %}
-            <tr>
-                <td><a href="">Generation {{ gen[0] }}</a> </td>
-                <td>{{ gen[1] }}</td>
-                <td>{{ gen[2] }}</td>
-            </tr>
-        {% endfor %}
-        </table>
-    {% endif %}
-{% endblock body%}
+    <div id="chart"></div>
+    {#    {% if generations %}#}
+    {#        <table>#}
+    {#        {% for gen in generations %}#}
+    {#            <tr>#}
+    {#                <td><a href="">Generation {{ gen[0] }}</a> </td>#}
+    {#                <td>{{ gen[1] }}</td>#}
+    {#                <td>{{ gen[2] }}</td>#}
+    {#            </tr>#}
+    {#        {% endfor %}#}
+    {#        </table>#}
+    {#    {% endif %}#}
+    <script src="{{ url_for('static', filename='summary.js') }}"></script>
+
+{% endblock body %}

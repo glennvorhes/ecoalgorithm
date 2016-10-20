@@ -6,11 +6,11 @@
     "declaration": true,
     "target": "es5",
     "sourceMap": false,
-    "outDir": "js"
+    "outDir": "ts_js"
   },
   "files": [
     "ts/results.ts",
-    "ts/generation.ts"
+    "ts/summary.ts"
   ],
   "exclude": [
         "node_modules"

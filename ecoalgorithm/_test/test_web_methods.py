@@ -17,17 +17,21 @@ class TestWebMethods(TestCase):
     #     build_example()
 
     def test_get_ind_info(self):
-        ind_summ = web.individual_summary('db61c619-4785-441d-9d7c-678ccba3078a')
+        pass
+        # ind_summ = web.individual_summary('db61c619-4785-441d-9d7c-678ccba3078a')
+        # self.assertGreaterEqual(len(ind_summ.siblings), 10)
 
-        self.assertGreaterEqual(len(ind_summ.siblings), 10)
-        # printd(ind_summ.class_name)
-        # printd(ind_summ.father.guid)
-        # printd(ind_summ.siblings)
-        # printd(ind_summ.params)
-        # printd(ind_summ.children)
 
     def test_get_gen(self):
         gen_sum = web.generation_summary(10)
+
+        self.assertIsNotNone(gen_sum)
+
+    def test_get_summary(self):
+        all_summ = web.all_summary()
+        self.assertIsNotNone(all_summ)
+
+        # printd(gen_sum)
     #     print(gen_sum.members)
 
         # ind = SpeciesBase.get_by_guid('4bae7a6d-fb12-4011-8871-f3238a6923f5')

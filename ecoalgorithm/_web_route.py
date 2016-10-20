@@ -1,10 +1,11 @@
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, Response
 # from ecoalgorithm import db
 from ecoalgorithm import _models as models
 from ._config import config
 import sqlalchemy
 from . import _web_methods as web
 from ._helpers import printd
+import json
 
 app = Flask(__name__)
 
@@ -13,60 +14,20 @@ app = Flask(__name__)
 @app.route('/summary')
 def summary():
 
-    all_summ = web.all_summary()
+    # all_summ = web.all_summary()
     out_str = 'fish'
-    return out_str
-    # generations = db.sess.query(models.Generation).order_by(sqlalchemy.desc(models.Generation.gen_num))
-    # """
-    # :type: list[models.Generation]
-    # """
-    #
-    # out_tuples = []
-    #
-    # for g in generations:
-    #     print(g.individuals)
-    #     # best = g.individuals[0]
-    #     out_tuples.append((g.gen_num, None, None))
-    #
-    # # for g in gens:
-    # #     assert isinstance(g, models.DbGeneration)
-    # #     """
-    # #     :type: models.DbGeneration
-    # #     """
-    # #
-    # #     out_str += 'Generation {0}<br>'.format(g.gen_num)
-    #
-    # gen_summary = db.sess.query(
-    #     models.SpeciesBase.gen_num,
-    #     sqlalchemy.func.max(models.SpeciesBase.success),
-    #     models.SpeciesBase.class_name,
-    #     sqlalchemy.func.count(models.SpeciesBase.class_name)
-    # ).group_by(
-    #     models.SpeciesBase.gen_num,
-    #     models.SpeciesBase.class_name
-    # ).order_by(
-    #     sqlalchemy.desc(models.SpeciesBase.gen_num),
-    #     sqlalchemy.asc(models.SpeciesBase.class_name)
-    # )
-
     return render_template('summary.html')
 
 
-#
-# @app.route('/generation')
-# def generation():
-#     f = db.sess.query(models.Generation).order_by(sqlalchemy.desc(models.Generation.gen_num)).first()
-#     """
-#     :type: models.DbGeneration
-#     """
-#
-#     out_str = ''
-#     for n in f.individuals:
-#         out_str += 'Success: {suc}, Class: {cl}, Args {kw} <br>'.format(suc=n.success, kw=n.kwargs, cl=n.class_name)
-#
-#     print(f)
-#
-#     return out_str
+@app.route('/summ')
+def summary_info():
+
+    summ = web.all_summary()
+
+    if summ is None:
+        return Response('{}', mimetype='application/json')
+    else:
+        return Response(summ.c3_json_str, mimetype='application/json')
 
 
 @app.route('/test')

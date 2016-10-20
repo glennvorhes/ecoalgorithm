@@ -1,11 +1,12 @@
 import ecoalgorithm
 from ._models import SpeciesBase, Generation
 from ._db_connect import db
-from collections import OrderedDict
 from ._helpers import printd
 import json
 from typing import List, Tuple
 import sqlalchemy
+from collections import defaultdict, OrderedDict
+from typing import Dict, List
 
 
 def _get_children_count(guid):
@@ -110,6 +111,15 @@ class _GenerationSummary:
     def __init__(self, gen_num: int):
         self._gen_num = gen_num
 
+        self._min_gen, self._max_gen = db.sess.query(
+            sqlalchemy.func.min(
+                Generation.gen_num
+            ),
+            sqlalchemy.func.max(
+                Generation.gen_num
+            )
+        ).first()
+
         mems = db.sess.query(SpeciesBase._guid, SpeciesBase._success, SpeciesBase._class_name).filter(
             SpeciesBase._gen_num == gen_num).order_by(
             sqlalchemy.desc(SpeciesBase._success)
@@ -130,6 +140,14 @@ class _GenerationSummary:
         self._best_inds = [_IndividualInfo(*m) for m in max_vals]
 
     @property
+    def min_gen(self) -> int:
+        return self._min_gen
+
+    @property
+    def max_gen(self) -> int:
+        return self._max_gen
+
+    @property
     def gen_num(self) -> int:
         return self._gen_num
 
@@ -141,10 +159,71 @@ class _GenerationSummary:
     def best_inds(self) -> List[_IndividualInfo]:
         return self._best_inds
 
+
 class _AllSummary:
 
     def __init__(self):
-        pass
+        max_vals = db.sess.query(
+            SpeciesBase._gen_num,
+            sqlalchemy.func.max(SpeciesBase._success)
+        ).group_by(
+            SpeciesBase._gen_num
+        ).order_by(
+            SpeciesBase._gen_num
+        ).all()
+
+        self._gen_list = []
+        self._max_vals = []
+
+        for m in max_vals:
+            self._gen_list.append(m[0])
+            self._max_vals.append(m[1])
+
+        max_species_vals = db.sess.query(
+            SpeciesBase._class_name,
+            sqlalchemy.func.max(SpeciesBase._success)
+        ).group_by(
+            SpeciesBase._gen_num,
+            SpeciesBase._class_name
+        ).order_by(
+            SpeciesBase._gen_num,
+            sqlalchemy.desc(
+                SpeciesBase._success
+            )
+        ).all()
+
+        self._species_vals = defaultdict(list)
+        """
+        :type: dict[str, list[float or None]]
+        """
+
+        for m in max_species_vals:
+            self._species_vals[m[0]].append(m[1])
+
+        gen_len = len(self._gen_list)
+
+        for v in self._species_vals.values():
+            while len(v) < gen_len:
+                v.append(None)
+
+    @property
+    def c3_json_str(self):
+
+        out_dict = dict({
+            'x': 'x',
+            'hide': [],
+            'json': {
+                'x': self._gen_list,
+                'All': self._max_vals
+            }
+        })
+
+        for k, v in self._species_vals.items():
+            out_dict['hide'].append(k)
+            out_dict['json'][k] = v
+
+        return json.dumps(out_dict, indent=4)
+
 
 
 def individual_summary(guid: str) -> _IndividualSummary or None:
@@ -165,8 +244,12 @@ def generation_summary(gen_num: int) -> _GenerationSummary or None:
 
 
 def all_summary() -> _AllSummary:
+    gen_count = db.sess.query(Generation).count()
 
-    return _AllSummary()
+    if gen_count < 2:
+        return None
+    else:
+        return _AllSummary()
 
 
-__all__ = [individual_summary, generation_summary]
+__all__ = [individual_summary, generation_summary, all_summary]

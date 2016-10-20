@@ -6,7 +6,13 @@
 
 {% block body %}
     {% if summ %}
-        <h1>Generation {{ summ.gen_num }}</h1>
+        {% if summ.gen_num > summ.min_gen %}
+            <a href="{{ url_for('generation', gen_num=summ.gen_num - 1) }}">Previous</a>
+        {% endif %}
+        <h1 style="display: inline-block">Generation {{ summ.gen_num }}</h1>
+        {% if summ.gen_num < summ.max_gen %}
+            <a href="{{ url_for('generation', gen_num=summ.gen_num + 1) }}">Next</a>
+        {% endif %}
         <h3>Best Individuals</h3>
         <ul>
             {% for b in summ.best_inds %}
