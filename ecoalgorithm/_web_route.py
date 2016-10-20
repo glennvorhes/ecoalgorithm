@@ -6,16 +6,16 @@ import sqlalchemy
 from . import _web_methods as web
 from ._helpers import printd
 import json
+import os
 
-app = Flask(__name__)
+the_dir = os.path.dirname(__file__)
+app = Flask(__name__, template_folder=os.path.join(the_dir, 'templates'), static_folder=os.path.join(the_dir, 'static'))
 
 
 @app.route('/')
 @app.route('/summary')
 def summary():
 
-    # all_summ = web.all_summary()
-    out_str = 'fish'
     return render_template('summary.html')
 
 
