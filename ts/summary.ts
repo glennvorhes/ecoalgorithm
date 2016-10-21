@@ -6,35 +6,41 @@ import $ =  require('jquery');
 
 $.get(window.location.origin + '/summ', {}, function (d) {
 
-    /**
-     * returned d has a specific format for entry into c3 generate
-     * 'x' the x axis as identified in the response, is identified as 'x'
-     * 'json' an object with keys and values as arrays, the 'x' values as well as the values from other data series
-     * 'hide' an array of keys in json to be hidden in the chart by default
-     */
+    console.log(d);
+
+    if (d['json']) {
 
 
-    var chart = c3.generate({
-        data: d,
-        axis: {
-            x: {
-                label: {
-                    text: 'Generation',
-                    position: 'outer-center',
-                }
-            },
-            y: {
-                label: {
-                    text: 'Success',
-                    position: 'outer-middle',
+        /**
+         * returned d has a specific format for entry into c3 generate
+         * 'x' the x axis as identified in the response, is identified as 'x'
+         * 'json' an object with keys and values as arrays, the 'x' values as well as the values from other data series
+         * 'hide' an array of keys in json to be hidden in the chart by default
+         */
+
+        var chart = c3.generate({
+            data: d,
+            axis: {
+                x: {
+                    label: {
+                        text: 'Generation',
+                        position: 'outer-center',
+                    }
+                },
+                y: {
+                    label: {
+                        text: 'Success',
+                        position: 'outer-middle',
+                    }
                 }
             }
-        }
-    });
+        });
+    } else {
+        $('.no-generations').css('display', 'block');
+    }
 
 
-
-        }, 'json');
+}, 'json');
 
 
 //

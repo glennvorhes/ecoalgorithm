@@ -46,6 +46,7 @@ def individual(guid):
 
 
 def start_web_server(port: int = None, debug: bool = None):
+    printd(config.db_path)
     port = config.web_port if type(port) is not int else port
     debug = config.web_debug if type(debug) is not bool else debug
     app.run(port=port, debug=debug)

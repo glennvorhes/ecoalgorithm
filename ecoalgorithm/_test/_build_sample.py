@@ -3,7 +3,7 @@ import ecoalgorithm._test
 from ecoalgorithm._test import test_ecosystem
 import os
 
-rerun = True
+rerun = False
 
 if __name__ == '__main__':
     if rerun:
