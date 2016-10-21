@@ -5,3 +5,4 @@ build
 __pycache__
 dist
 **/*.egg-info
+ecoalgorithm/_test/test_dbs

@@ -74,10 +74,10 @@ class Ecosystem(object):
 
         required_max = 0
         for s in species_set:
-            required_max += s.get_offspring_count()
+            required_max += s.get_offspring_count() + 2
 
         if max_population < required_max:
-            raise AssertionError('Max population must be greater than the sum of class offspring counts')
+            raise AssertionError('Max population must be greater than the sum of class offspring counts + 2')
 
         if use_existing:
             gen_num = Generation.get_current_generation_number()
@@ -106,7 +106,7 @@ class Ecosystem(object):
 
         self._working_generation.save()
 
-    def run(self, generation_limit=None, show_output: ShowOutput=ShowOutput.NONE, break_threshold: float=1):
+    def run(self, generation_limit=None, show_output: ShowOutput=ShowOutput.NONE, break_threshold: float or None=1):
         """
         start running
 

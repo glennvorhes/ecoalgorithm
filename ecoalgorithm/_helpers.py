@@ -190,6 +190,7 @@ def _make_weights(ind_count: int):
 
 
 def _random_pick(some_list, probabilities):
+
     x = random.uniform(0, 1)
     cumulative_probability = 0.0
     for item, item_probability in zip(some_list, probabilities):
@@ -207,7 +208,7 @@ class IndividualPicker:
         :param ind_list: the items to be potentially picked
         :type ind_list: list[SpeciesBase]
         """
-
+        self._count_all = len(ind_list)
         for j in ind_list:
             assert j.is_mature
 
@@ -262,7 +263,7 @@ class IndividualPicker:
         return ind
 
     @property
-    def num_alive(self):
+    def num_alive(self) -> int:
         return len(self._ind_list)
 
     @property
@@ -275,6 +276,10 @@ class IndividualPicker:
             return self._ind_list[-1]
         else:
             return None
+
+    @property
+    def count_all(self) -> int:
+        return self._count_all
 
     @property
     def count_alive(self) -> int:

@@ -427,15 +427,18 @@ class Generation(Base):
 
         if keep_all:
             for class_name, picker in self._by_species_picker.items():
+                # create new individuals using the class constructor
+                the_class = self._species_lookup[class_name]
+
                 if picker.has_two_alive:
                     female = picker.pick_female()
                     male = picker.pick_male(female)
                     male.get_offspring_count()
                     progeny = _helpers.breed(female, male)
+                    # add two new to prevent a bad random start population
+                    progeny.extend([the_class(), the_class()])
                     self._next_gen_individuals.extend(progeny)
-                else:
-                    # create new individuals using the class constructor
-                    the_class = self._species_lookup[class_name]
+                elif picker.count_all > 0:
                     for i in range(the_class.get_offspring_count()):
                         self._next_gen_individuals.append(the_class())
 
@@ -451,8 +454,11 @@ class Generation(Base):
 
             if species_picker.has_two_alive:
                 male = species_picker.pick_male(female)
+            else:
+                male = self._species_lookup[female.class_name]()
+                male.mature()
 
-                self._next_gen_individuals.extend(_helpers.breed(female, male))
+            self._next_gen_individuals.extend(_helpers.breed(female, male))
 
         if len(self._next_gen_individuals) > max_population:
             self._next_gen_individuals = self._next_gen_individuals[:max_population]
