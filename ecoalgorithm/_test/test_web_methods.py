@@ -8,7 +8,7 @@ from .._helpers import printd
 from .. import _web_methods as web
 import os
 
-ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'results.db_123')
+ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'results.db_test')
 
 
 class TestWebMethods(TestCase):

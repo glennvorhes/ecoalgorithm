@@ -1,5 +1,5 @@
 import os
-
+import re
 
 class EcoConfig:
 
@@ -34,7 +34,7 @@ class EcoConfig:
         db = db.strip()
         try:
             assert os.path.isdir(os.path.dirname(db))
-            assert db.endswith('.db') or db.endswith('.db_123')
+            assert re.search(r'\.(db_test|db_\d{3})$', '.db_123')
         except AssertionError:
             raise AssertionError("The new db file has an invalid directory or does not end with .db")
 
