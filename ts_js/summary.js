@@ -26,6 +26,9 @@ $.get(window.location.origin + '/summ', {}, function (d) {
                         position: 'outer-middle',
                     }
                 }
+            },
+            zoom: {
+                enabled: true
             }
         });
     }
