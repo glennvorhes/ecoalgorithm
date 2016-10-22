@@ -431,13 +431,12 @@ class Generation(Base):
                 the_class = self._species_lookup[class_name]
 
                 if picker.has_two_alive:
-                    female = picker.pick_female()
-                    male = picker.pick_male(female)
-                    male.get_offspring_count()
-                    progeny = _helpers.breed(female, male)
-                    # add two new to prevent a bad random start population
-                    progeny.extend([the_class(), the_class()])
-                    self._next_gen_individuals.extend(progeny)
+                    for i in range(2):
+                        female = picker.pick_female()
+                        male = picker.pick_male(female)
+                        self._next_gen_individuals.extend(_helpers.breed(female, male))
+                    # add two new to prevent inbreeding
+                    self._next_gen_individuals.extend([the_class(), the_class()])
                 elif picker.count_all > 0:
                     for i in range(the_class.get_offspring_count()):
                         self._next_gen_individuals.append(the_class())

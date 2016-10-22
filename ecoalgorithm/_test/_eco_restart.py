@@ -17,7 +17,6 @@ replace_inds = True
 if __name__ == '__main__':
     db.clear_db()
     config.multithread = False
-    max_pop = 40
 
     run_gens = 4
 
@@ -31,7 +30,7 @@ if __name__ == '__main__':
         inds.append(Fish())
         inds.append(Dog())
 
-    eco = ecoalgorithm.Ecosystem(species_set, inds, use_existing=False, max_population=max_pop)
+    eco = ecoalgorithm.Ecosystem(species_set, inds, use_existing=False)
     eco.run(run_gens, ecoalgorithm.ShowOutput.SHORT)
 
     mn, mx = db.sess.query(
@@ -81,5 +80,5 @@ if __name__ == '__main__':
 
     printd('restarting')
 
-    eco = ecoalgorithm.Ecosystem(get_species_set(), new_inds, max_population=max_pop)
+    eco = ecoalgorithm.Ecosystem(get_species_set(), new_inds)
     eco.run(400, ecoalgorithm.ShowOutput.SHORT, break_threshold=None)

@@ -19,8 +19,8 @@ class Ecosystem(object):
                  species_set: Set[SpeciesBase.__class__],
                  new_individuals: List[SpeciesBase] = list(),
                  use_existing: bool = True,
-                 max_population: int = 100,
-                 keep_all: bool = True
+                 keep_all: bool = True,
+                 max_population: None or int = None
                  ):
         """
         initialize the population
@@ -33,7 +33,7 @@ class Ecosystem(object):
         :type new_individuals: list[SpeciesBase]
         :type species_set: list[type]
         :type use_existing: bool
-        :type max_population: int
+        :type max_population: int|None
         """
 
         # validate inputs
@@ -51,12 +51,8 @@ class Ecosystem(object):
             assert ind.__class__.__name__ != SpeciesBase.__name__
 
         assert type(use_existing) is bool
-
-        assert type(max_population) is int
-
         assert type(keep_all) is bool
 
-        self._max_population = max_population
         self._keep_all = keep_all
 
         self._working_generation = None
@@ -69,15 +65,23 @@ class Ecosystem(object):
 
         # validate the species classes
         for s in species_set:
-
             s.validate_class()
 
-        required_max = 0
+        self._max_population = 0
         for s in species_set:
-            required_max += s.get_offspring_count() + 2
+            self._max_population += s.get_offspring_count()
 
-        if max_population < required_max:
-            raise AssertionError('Max population must be greater than the sum of class offspring counts + 2')
+        self._max_population *= 2
+        self._max_population += 2 * len(species_set)
+
+        if max_population is not None:
+            if not isinstance(max_population, int):
+                raise AssertionError('If defined, max population must be an integer')
+            if max_population < self._max_population:
+                raise AssertionError('If defined, max population must greater than or equal to \n'
+                                     'sum(2 * Species offspring count) + 2 * length species set. \n'
+                                     'Calculated as {0}'.format(self._max_population))
+            self._max_population = max_population
 
         if use_existing:
             gen_num = Generation.get_current_generation_number()
