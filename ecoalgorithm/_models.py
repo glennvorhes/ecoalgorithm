@@ -8,7 +8,7 @@ from uuid import uuid4
 from collections import OrderedDict
 from abc import abstractmethod
 from typing import List, Dict, Set
-
+from warnings import warn
 from . import _helpers
 
 
@@ -103,6 +103,19 @@ class SpeciesBase(Base):
                 raise AssertionError('mate must return offspring of the same class: {0} returned {1}'.format(
                     cls.__name__, p.class_name
                 ))
+
+        p = ind1.params
+
+        try:
+            cls(**p)
+        except TypeError as ex:
+            warn("\nArgument not in constructor for class " + ind1.db_class_name + "\n" + str(ex.args))
+            raise ex
+
+        cls_keys = [k for k in ind1.__dict__.keys() if not k.startswith('_')]
+
+        if len(p) != len(cls_keys):
+            raise AssertionError("number of __init__ args must equal the number of public species attributes")
 
         cls._validated = True
         return cls._validated

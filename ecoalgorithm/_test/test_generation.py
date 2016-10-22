@@ -1,9 +1,9 @@
-from ecoalgorithm import db
+from ecoalgorithm import db, config
 from .. import Ecosystem, SpeciesBase
 from .._models import Generation
 from .example_species import Cat, Dog, Fish, DeadFish, get_some_inds, get_species_set
 from unittest import TestCase
-
+import os
 
 Cat.validate_class()
 Dog.validate_class()
@@ -19,6 +19,7 @@ class TestGeneration(TestCase):
     # species_set = {Fish, Cat, Dog, DeadFish}
 
     def setUp(self):
+        config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'gen_test.db')
         db.clear_db()
         self.eco = None
 

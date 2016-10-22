@@ -10,13 +10,15 @@ import os
 from .._db_connect import db
 from .example_species import get_species_set, get_some_inds
 
-ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'results.test_db')
 
 
 class TestWebMethods(TestCase):
 
     # def test_test(self):
     #     build_example()
+
+    def setUp(self):
+        ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'web_test.db')
 
     def test_get_ind_info(self):
         pass

@@ -1,7 +1,10 @@
 from .example_species import ExampleSpecies, get_species_lookup
 from unittest import TestCase
-from ecoalgorithm import db, SpeciesBase
+from ecoalgorithm import db, SpeciesBase, config
 from .. import _helpers
+import os
+from .._helpers import printd
+
 
 
 class SpeciesTest(TestCase):
@@ -37,7 +40,7 @@ class SpeciesTest(TestCase):
         db.sess.commit()
 
     def setUp(self):
-        pass
+        config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'species.db')
 
     def test_uid(self):
         self.clear_inds()
