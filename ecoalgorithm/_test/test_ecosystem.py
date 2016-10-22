@@ -5,6 +5,7 @@ from .example_species import Cat, Dog, Fish, DeadFish, Snake, Racoon, \
 from unittest import TestCase
 from typing import List
 from .. import ShowOutput
+import os
 
 
 def get_eco_inds(eco: Ecosystem) -> List[SpeciesBase]:
@@ -23,13 +24,16 @@ def build_example():
 
 
 class TestEcosystem(TestCase):
+    
+    def setUp(self):
+        config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'eco.db')
 
     def test_create_no_existing(self):
         eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
         self.assertEqual(get_eco_inds_len(eco), get_some_inds_len())
 
     def test_class_validation(self):
-        # return
+        db.clear_db()
         with self.assertRaises(AssertionError):
             Ecosystem({Snake, Fish, Racoon})
 
@@ -43,13 +47,15 @@ class TestEcosystem(TestCase):
         self.assertEqual(get_eco_inds_len(eco), get_some_inds_len() + 2)
 
     def test_add_not_in_set(self):
-        # return
+        config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'not_in_set.db')
+        db.clear_db()
         inds = get_some_inds()
         inds.append(Snake())
         inds.append(Snake())
         inds.append(Snake())
         inds.append(Snake())
-        Ecosystem(get_species_set(), inds, use_existing=False)
+        eco = Ecosystem(get_species_set(), inds, use_existing=False)
+        eco.run(1)
 
         with self.assertRaises(KeyError):
             Ecosystem(get_species_set())
@@ -76,14 +82,14 @@ class TestEcosystem(TestCase):
 
     def test_start_run(self):
         # return
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=20)
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
         eco.run(5)
-        eco = Ecosystem(get_species_set(), max_population=20)
+        eco = Ecosystem(get_species_set())
         eco.run(5)
 
     def test_keep_all(self):
         # return
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=20, )
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
         eco.run(2)
         inds = get_eco_inds(eco)
         dead_fish = [ind for ind in inds if type(ind) is DeadFish]
@@ -91,7 +97,7 @@ class TestEcosystem(TestCase):
 
     def test_not_keep_all(self):
         # return
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=20, keep_all=False)
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, keep_all=False)
         eco.run(2)
         inds = get_eco_inds(eco)
         dead_fish = [ind for ind in inds if type(ind) is DeadFish]
@@ -99,29 +105,34 @@ class TestEcosystem(TestCase):
 
     def test_keep_all_all_dead(self):
         # return
-        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, max_population=20, )
+        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False)
         eco.run(3)
         inds = get_eco_inds(eco)
         print(inds)
 
     def test_not_keep_all_all_dead(self):
         # return
-        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, max_population=20, keep_all=False)
+        eco = Ecosystem({DeadFish}, [DeadFish(), DeadFish()], use_existing=False, keep_all=False)
         eco.run(3)
         # inds = get_eco_inds(eco)
 
     def test_show_output(self):
         # return
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=20)
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
 
         eco.run(3, ShowOutput.SHORT)
         eco.run(3, ShowOutput.LONG)
 
     def test_bail_on_dead(self):
         # return
-        eco = Ecosystem({DeadFish}, [DeadFish()], use_existing=False, max_population=20)
+        eco = Ecosystem({DeadFish}, [DeadFish()], use_existing=False)
         eco.run(20)
 
     def test_threshold(self):
-        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=50)
+        eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
         eco.run(100, ShowOutput.SHORT, break_threshold=1)
+
+    def test_min_max_population(self):
+        with self.assertRaises(AssertionError):
+            eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False, max_population=10)
+

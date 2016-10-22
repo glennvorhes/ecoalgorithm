@@ -7,8 +7,10 @@ from .._models import Generation, SpeciesBase
 from .._helpers import printd
 from .. import _web_methods as web
 import os
+from .._db_connect import db
+from .example_species import get_species_set, get_some_inds
 
-ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'results.db_test')
+ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'results.test_db')
 
 
 class TestWebMethods(TestCase):
@@ -23,13 +25,16 @@ class TestWebMethods(TestCase):
 
 
     def test_get_gen(self):
-        gen_sum = web.generation_summary(10)
-
+        eco = ecoalgorithm.Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
+        eco.run(2)
+        gen_sum = web.generation_summary(2)
+        # get_species_set, get_some_inds
         self.assertIsNotNone(gen_sum)
 
     def test_get_summary(self):
+        db.clear_db()
         all_summ = web.all_summary()
-        self.assertIsNotNone(all_summ)
+        self.assertIsNone(all_summ)
 
         # printd(gen_sum)
     #     print(gen_sum.members)

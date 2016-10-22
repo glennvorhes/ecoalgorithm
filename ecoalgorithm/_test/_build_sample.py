@@ -9,7 +9,7 @@ if __name__ == '__main__':
     if rerun:
         ecoalgorithm.db.delete_db()
         ecoalgorithm.config.db_path = os.path.join(
-            os.getcwd(), 'results.db_test')
+            os.getcwd(), 'test_dbs', 'results.test_db')
         ecoalgorithm.config.multithread = False
 
         test_ecosystem.build_example()

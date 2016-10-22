@@ -6,7 +6,7 @@ import os
 from .example_species import Cat, Dog, Fish, DeadFish, Snake, Racoon, \
     get_some_inds, get_species_set, get_some_inds_len, ExampleSpecies
 
-ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'res.db')
+ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'conn_test.db')
 
 
 class TestDbConnect(TestCase):
@@ -56,7 +56,7 @@ class TestDbConnect(TestCase):
         self.assertIsNot(db1, db3)
 
     def test_change_db(self):
-        ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'db2.db')
+        ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'db2.db')
         db.clear_db()
         gen = models.Generation(get_species_set())
         gen.add_individuals(get_some_inds())
@@ -64,7 +64,7 @@ class TestDbConnect(TestCase):
         g = db.sess.query(models.Generation).count()
         self.assertEqual(g, 1)
 
-        ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'db3.db')
+        ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'db3.db')
         db.clear_db()
         gen = models.Generation(get_species_set())
         gen.add_individuals(get_some_inds())
@@ -72,7 +72,7 @@ class TestDbConnect(TestCase):
         g = db.sess.query(models.Generation).count()
         self.assertEqual(g, 1)
 
-        ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'db2.db')
+        ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'db2.db')
         g = db.sess.query(models.Generation).count()
         self.assertEqual(g, 1)
 
@@ -80,6 +80,6 @@ class TestDbConnect(TestCase):
             ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'cats', 'db.db')
 
         with self.assertRaises(AssertionError):
-            ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'db.dbbbbb')
+            ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'db.dbbbbb')
 
 

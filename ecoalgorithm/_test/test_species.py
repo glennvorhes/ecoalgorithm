@@ -1,4 +1,4 @@
-from .example_species import ExampleSpecies
+from .example_species import ExampleSpecies, get_species_lookup
 from unittest import TestCase
 from ecoalgorithm import db, SpeciesBase
 from .. import _helpers
@@ -159,8 +159,17 @@ class SpeciesTest(TestCase):
         db.sess.add_all(out_list)
         db.sess.commit()
 
-        self.assertEquals(x, out_list[0].mother.x)
-        self.assertEquals(y, out_list[0].father.y)
+        moth =out_list[0].mother
+        fath = out_list[0].father
+
+        lkp = get_species_lookup()
+        moth.__class__ = lkp[moth._class_name]
+        fath.__class__ = lkp[fath._class_name]
+        moth.__init__()
+        fath.__init__()
+
+        self.assertEquals(x, moth.x)
+        self.assertEquals(y, fath.y)
 
         out_list[0]._mother_id = None
 

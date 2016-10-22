@@ -3,7 +3,7 @@ from ._config import config
 from typing import Dict, List, Set
 from ._models import Generation, SpeciesBase
 from warnings import warn
-from ._helpers import ShowOutput
+from ._helpers import ShowOutput, printd
 from . import config
 from datetime import datetime
 
@@ -98,7 +98,6 @@ class Ecosystem(object):
                 ).first()
 
                 self._working_generation.__init__(species_set)
-
         else:
             db.clear_db()
             if len(new_individuals) == 0:
@@ -107,6 +106,13 @@ class Ecosystem(object):
 
         if new_individuals:
             self._working_generation.add_individuals(new_individuals)
+
+        # make sure all the individuals have a class in the species set
+        # lkp = {}
+        # for ind in self._working_generation._individuals:
+        #     if ind._class_name
+        #     printd(ind)
+
 
         self._working_generation.save()
 

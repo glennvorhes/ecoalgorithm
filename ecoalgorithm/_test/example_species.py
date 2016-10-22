@@ -1,5 +1,6 @@
 from random import random
 from ecoalgorithm import SpeciesBase
+from typing import Set, Dict
 
 from time import sleep
 
@@ -87,14 +88,25 @@ def get_some_inds_len():
     return len(get_some_inds())
 
 
-def get_species_set():
-    species_set = {Fish, Cat, Dog, DeadFish}
+def get_species_set() -> Set[type]:
+    species_set = {Fish, Cat, Dog, DeadFish, ExampleSpecies}
 
     Fish._validated = False
     Cat._validated = False
     Dog._validated = False
     DeadFish._validated = False
+    ExampleSpecies._validated=False
     return species_set
+
+
+def get_species_lookup() -> Dict[str, type]:
+    sp_set = get_species_set()
+
+    out_dict = {}
+    for s in sp_set:
+        out_dict[s.__name__] = s
+
+    return out_dict
 
 
 __all__ = [get_species_set, get_some_inds, get_some_inds_len, Dog, Cat, Fish, DeadFish, ExampleSpecies]
