@@ -21,18 +21,9 @@ def summary():
 
 @app.route('/summ')
 def summary_info():
-
     summ = web.all_summary()
-
-    if summ is None:
-        return Response('{}', mimetype='application/json')
-    else:
-        return Response(summ.c3_json_str, mimetype='application/json')
-
-
-@app.route('/test')
-def test():
-    return render_template('test.html')
+    return_val = '{}' if summ is None else summ.c3_json_str
+    return Response(return_val, mimetype='application/json')
 
 
 @app.route('/generation/<int:gen_num>')

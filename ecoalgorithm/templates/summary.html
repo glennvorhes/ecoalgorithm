@@ -5,8 +5,9 @@
 
 {% block body %}
     <h1>Summary</h1>
+    <button id="refresh">Refresh</button>
     <div id="chart"></div>
-    <div style="display: none">
+    <div id="summary-none" class="summary-none">
         <h4 class="no-info">No Generations have been created</h4>
     </div>
     <script src="{{ url_for('static', filename='summary.js') }}"></script>
