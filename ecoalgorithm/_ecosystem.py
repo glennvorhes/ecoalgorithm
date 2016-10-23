@@ -87,8 +87,8 @@ class Ecosystem(object):
             gen_num = Generation.get_current_generation_number()
 
             if gen_num is None:
-                warn('no existing results, populate with new individuals')
-                if len(new_individuals) == 2:
+                warn('\nNo existing results, populate with new individuals')
+                if len(new_individuals) == 0:
                     raise AssertionError('Not enough individuals to start')
 
                 self._working_generation = Generation(species_set)
@@ -106,13 +106,6 @@ class Ecosystem(object):
 
         if new_individuals:
             self._working_generation.add_individuals(new_individuals)
-
-        # make sure all the individuals have a class in the species set
-        # lkp = {}
-        # for ind in self._working_generation._individuals:
-        #     if ind._class_name
-        #     printd(ind)
-
 
         self._working_generation.save()
 
@@ -161,7 +154,7 @@ class Ecosystem(object):
                     break
 
             if not self._working_generation.populate_next_generation(self._max_population, self._keep_all):
-                warn("No living individuals and keep all flag set to false, exiting loop")
+                warn("\nNo living individuals and keep all flag set to false, exiting loop")
                 break
 
             if show_output == ShowOutput.SHORT:
@@ -175,7 +168,7 @@ class Ecosystem(object):
                 generations_below_threshold_count = 0
                 no_success_generation_count += 1
                 if no_success_generation_count > 10:
-                    warn("10 generations with no successful individuals, breaking loop")
+                    warn("\n10 generations with no successful individuals, breaking loop")
                     break
             else:
                 no_success_generation_count = 0
@@ -187,7 +180,7 @@ class Ecosystem(object):
                         generations_below_threshold_count += 1
 
                         if generations_below_threshold_count > 5:
-                            msg = "5 generations with change less than {0}%".format(
+                            msg = "\n5 generations with change less than {0}%".format(
                                 break_threshold * 100
                             )
                             warn(msg)
