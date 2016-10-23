@@ -5,7 +5,7 @@ from ecoalgorithm._test.example_species import Cat, Dog, Fish, DeadFish, Snake, 
     get_some_inds, get_species_set, get_some_inds_len, ExampleSpecies
 import multiprocessing
 
-ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'results.db_445')
+ecoalgorithm.config.db_path = os.path.join(os.path.dirname(__file__), 'test_dbs', 'results.db_445')
 ecoalgorithm.config.multithread = False
 from ecoalgorithm._helpers import printd
 

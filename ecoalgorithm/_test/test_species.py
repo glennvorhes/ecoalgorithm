@@ -40,7 +40,7 @@ class SpeciesTest(TestCase):
         db.sess.commit()
 
     def setUp(self):
-        config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'species.db')
+        config.db_path = os.path.join(os.path.dirname(__file__), 'test_dbs', 'species.db')
 
     def test_uid(self):
         self.clear_inds()

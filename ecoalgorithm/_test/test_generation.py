@@ -19,7 +19,7 @@ class TestGeneration(TestCase):
     # species_set = {Fish, Cat, Dog, DeadFish}
 
     def setUp(self):
-        config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'gen_test.db')
+        config.db_path = os.path.join(os.path.dirname(__file__), 'test_dbs', 'gen_test.db')
         db.clear_db()
         self.eco = None
 

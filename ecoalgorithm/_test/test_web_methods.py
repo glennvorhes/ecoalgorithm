@@ -18,7 +18,7 @@ class TestWebMethods(TestCase):
     #     build_example()
 
     def setUp(self):
-        ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'web_test.db')
+        ecoalgorithm.config.db_path = os.path.join(os.path.dirname(__file__), 'test_dbs', 'web_test.db')
 
     def test_get_ind_info(self):
         pass

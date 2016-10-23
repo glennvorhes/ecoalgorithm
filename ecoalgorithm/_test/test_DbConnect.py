@@ -6,7 +6,7 @@ import os
 from .example_species import Cat, Dog, Fish, DeadFish, Snake, Racoon, \
     get_some_inds, get_species_set, get_some_inds_len, ExampleSpecies
 
-ecoalgorithm.config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'conn_test.db')
+ecoalgorithm.config.db_path = os.path.join(os.path.dirname(__file__), 'test_dbs', 'conn_test.db')
 
 
 class TestDbConnect(TestCase):

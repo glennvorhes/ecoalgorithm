@@ -26,7 +26,7 @@ def build_example():
 class TestEcosystem(TestCase):
     
     def setUp(self):
-        config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'eco.db')
+        config.db_path = os.path.join(os.path.dirname(__file__), 'test_dbs', 'eco.db')
 
     def test_create_no_existing(self):
         eco = Ecosystem(get_species_set(), get_some_inds(), use_existing=False)
@@ -47,7 +47,7 @@ class TestEcosystem(TestCase):
         self.assertEqual(get_eco_inds_len(eco), get_some_inds_len() + 2)
 
     def test_add_not_in_set(self):
-        config.db_path = os.path.join(os.getcwd(), 'test_dbs', 'not_in_set.db')
+        config.db_path = os.path.join(os.path.dirname(__file__), 'test_dbs', 'not_in_set.db')
         db.clear_db()
         inds = get_some_inds()
         inds.append(Snake())
