@@ -11,9 +11,18 @@ except ImportError:
 
 setup(
     name='ecoalgorithm',
-    version='',
+    version='1.0',
     packages=['ecoalgorithm'],
-    package_data={'ecoalgorithm': ['static/*.js', 'static/*.map', 'static/*.css', 'templates/*.html', '_test/*.*']},
+    package_data={
+        'ecoalgorithm': [
+            'static/*.js',
+            'static/*.map',
+            'static/*.css',
+            'templates/*.html',
+            '_test/*.*',
+            '_test/test_dbs/results.test_db'
+        ]
+    },
     url='https://github.com/glennvorhes/ecoalgorithm',
     license='MIT',
     author='Glenn Vorhes',
