@@ -1,16 +1,13 @@
 from flask import Flask, redirect, url_for, render_template, Response
-# from ecoalgorithm import db
 import ecoalgorithm
-from ecoalgorithm import _models as models
-from ._config import config
-import sqlalchemy
 from . import _web_methods as web
-from ._helpers import printd
-import json
 import os
 
 the_dir = os.path.dirname(__file__)
-app = Flask(__name__, template_folder=os.path.join(the_dir, 'templates'), static_folder=os.path.join(the_dir, 'static'))
+app = Flask(__name__,
+            template_folder=os.path.join(the_dir, 'templates'),
+            static_folder=os.path.join(the_dir, 'static')
+            )
 
 
 @app.route('/')
@@ -44,6 +41,7 @@ def start_web_server(
     assert isinstance(debug, bool)
 
     app.run(port=port, debug=debug)
+
 
 
 __all__ = [app, start_web_server]
