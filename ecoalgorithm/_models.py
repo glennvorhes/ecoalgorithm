@@ -10,7 +10,7 @@ from abc import abstractmethod
 from typing import List, Dict, Set
 from warnings import warn
 from . import _helpers
-
+from random import random
 
 Base = declarative_base()
 
@@ -474,6 +474,12 @@ class Generation(Base):
 
         if len(self._next_gen_individuals) > max_population:
             self._next_gen_individuals = self._next_gen_individuals[:max_population]
+
+        for ind in self._next_gen_individuals:
+            # TODO add random mutate
+            if random() < 0.5:
+                ind.mutate()
+            pass
 
         return True
 
