@@ -1,25 +1,31 @@
-html, body{
-  width: 100%;
-}
+//html, body{
+//  width: 100%;
+//}
 
-
-body{
+body {
   background-color: lightgrey;
   margin: 10px 5%;
 
-  > div{
+  > div {
     width: 90%;
   }
 }
 
-.parents, .ind-info, .children, .members{
+.parents, .ind-info, .children, .members {
+  margin-top: 10px;
   display: flex;
+  flex-wrap: wrap;
 
-  > div{
+  ul {
+    margin: 0;
+  }
+
+  > div {
     flex: 1;
+    min-width: 325px;
   }
 }
 
-.no-info{
+.no-info {
   color: red;
 }

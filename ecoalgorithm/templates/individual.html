@@ -6,8 +6,8 @@
 {% block body %}
     <h1>Individual</h1>
     {% if summ %}
-        {% if summ.mother and summ.father %}
-            <div class="parents">
+        <div class="parents">
+            {% if summ.mother and summ.father %}
                 <div>
                     <a href="{{ url_for('individual', guid=summ.mother.guid) }}">
                         Mother Success: {{ summ.mother.success }} ({{ summ.mother.child_count }})
@@ -18,8 +18,15 @@
                         Father Success: {{ summ.father.success }} ({{ summ.father.child_count }})
                     </a>
                 </div>
-            </div>
-        {% endif %}
+            {% else %}
+                <div>
+                    Mother: None
+                </div>
+                <div>
+                    Father: None
+                </div>
+            {% endif %}
+        </div>
         <div>
             <a href="{{ url_for('generation', gen_num=summ.gen_num) }}">
                 <h3>Generation {{ summ.gen_num }}</h3>

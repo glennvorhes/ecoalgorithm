@@ -6,13 +6,26 @@
 
 {% block body %}
     {% if summ %}
-        {% if summ.gen_num > summ.min_gen %}
-            <a href="{{ url_for('generation', gen_num=summ.gen_num - 1) }}">Previous</a>
-        {% endif %}
-        <h1 style="display: inline-block">Generation {{ summ.gen_num }}</h1>
-        {% if summ.gen_num < summ.max_gen %}
-            <a href="{{ url_for('generation', gen_num=summ.gen_num + 1) }}">Next</a>
-        {% endif %}
+        <div id="generation-header">
+            {% if summ.gen_num > summ.min_gen %}
+                {% if summ.gen_num - 1 > summ.min_gen %}
+                    <a title="First" href="{{ url_for('generation', gen_num=summ.min_gen) }}">&lt;&lt;</a>
+                {% else %}
+                    <span>&lt;&lt;</span>
+                {% endif %}
+                <a title="Previous" href="{{ url_for('generation', gen_num=summ.gen_num - 1) }}">&lt;</a>
+            {% else %}
+                <span>&lt;&lt;</span>
+                <span>&lt;</span>
+            {% endif %}
+            <h1 style="display: inline-block">Generation {{ summ.gen_num }}</h1>
+            {% if summ.gen_num < summ.max_gen %}
+                <a title="Next" href="{{ url_for('generation', gen_num=summ.gen_num + 1) }}">&gt;</a>
+                {% if summ.gen_num + 1 < summ.max_gen %}
+                    <a title="Last" href="{{ url_for('generation', gen_num=summ.max_gen) }}">&gt;&gt;</a>
+                {% endif %}
+            {% endif %}
+        </div>
         <h3>Best Individuals</h3>
         <ul>
             {% for b in summ.best_inds %}
